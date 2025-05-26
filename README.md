@@ -1,6 +1,6 @@
 # 3DNamePlate
 
-This repository contains an OpenSCAD script for generating customizable 3D name plates. The script was originally shared on MakerWorld and is distributed under a CC BY-NC-SA license.
+This repository contains an OpenSCAD script for generating customizable 3D name plates. The script was originally shared on MakerWorld and is distributed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (CC BY-NC-SA 4.0).
 
 ## Editing `3dnameplate.scad`
 

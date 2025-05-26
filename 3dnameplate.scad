@@ -1,6 +1,6 @@
 // Author: https://makerworld.com/@Makkuro
 // Link: https://makerworld.com/en/models/436531
-// License: CC-Attribution-Noncommercial-Share Alike
+// License: Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
 
 // preview[view:south west, tilt:side]
 
@@ -155,12 +155,12 @@ https://en.instagram-brand.com/assets/glyph-icon
 
 Thanks to Hamish Trolove (www.techmonkeybusiness.com) for the script to generate holes in a regular pattern.
 
-License: Attribution 4.0 International (CC BY 4.0)
+License: Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
 
 You are free to:
     Share - copy and redistribute the material in any medium or format
     Adapt - remix, transform, and build upon the material
-    for any purpose, even commercially.
+    for non-commercial purposes only.
 */
 
 
