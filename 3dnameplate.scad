@@ -119,6 +119,8 @@ fontstyle2="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","I
 fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif"]
 fontstyle3="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
 fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif"]
+// Font used for emoji characters in special icons
+emoji_font="Noto Emoji";
 
 
 /* [Hidden] */
@@ -646,7 +648,7 @@ module do_special_char(typestr,special_emoji)
     {
         echo ("FONT!", len(special_emoji), special_emoji);
         scale(.6)
-        text(special_emoji,size=specialcharsize,font="Noto Emoji",halign="center",valign="center");
+        text(special_emoji,size=specialcharsize,font=emoji_font,halign="center",valign="center");
     }
     else
     if (type(typestr) == "int")
@@ -660,7 +662,7 @@ module do_special_char(typestr,special_emoji)
         if (len(typestr)<3)
         {
             scale(.6)
-                text(typestr,size=specialcharsize,font="Noto Emoji",halign="center",valign="center");
+                text(typestr,size=specialcharsize,font=emoji_font,halign="center",valign="center");
         }
         else
         {
