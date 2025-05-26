@@ -87,6 +87,9 @@ base_radius_add=3.5;
 //set base height in mm
 baseheight=1;
 
+//Optional connector width for "Round" bases in mm (0 to disable)
+round_base_link_width=0; //[0:0.1:10]
+
 //set angle to sweep 
 cutangle=65;
 
@@ -1021,12 +1024,21 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
                                         polygon(path_pts);
                         }                   
             
-                    if(BaseType=="Round")        
-                        linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5) 
-                            offset(r = base_radius_add) 
-                            {
-                                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
-                            }               
+                    if(BaseType=="Round")
+                        linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                            flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
+                                union() {
+                                    offset(r = base_radius_add)
+                                    {
+                                        writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                                    }
+                                    if(round_base_link_width > 0)
+                                        translate([-textwidth/2 - base_radius_add,
+                                                   -round_base_link_width/2])
+                                            square([textwidth + 2*base_radius_add,
+                                                   round_base_link_width]);
+                                }
+                            }
 
                     if (BaseSwissCheeseHoleD>0)
                     {
@@ -1130,9 +1142,14 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             } else if(BaseType=="Round") {
                 linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
                     flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
-                        offset(r = base_radius_add)
-                        {
-                            writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                        union() {
+                            offset(r = base_radius_add)
+                            {
+                                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                            }
+                            if(round_base_link_width > 0)
+                                translate([-textwidth/2 - base_radius_add, -round_base_link_width/2])
+                                    square([textwidth + 2*base_radius_add, round_base_link_width]);
                         }
                     }
             } else if(BaseType=="Bottom_Line") {

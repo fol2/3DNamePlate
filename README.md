@@ -5,7 +5,7 @@ This repository contains an OpenSCAD script for generating customizable 3D name 
 ## Editing `3dnameplate.scad`
 
 Open `3dnameplate.scad` in OpenSCAD and use the Customizer pane to tweak the text, layout, and other options. The Customizer exposes settings for the three text lines, base style, sweep angle and more. Font choices can be adjusted using the `fontname*` and `fontstyle*` parameters. In the Customizer these appear under the “Hidden” section. Enter any installed font family and style to render the text. The script also provides `text_color` and `base_color` parameters so the preview can show different colors for the text and base. Specify these colors using standard 0‑255 RGB values.
-To widen or tighten the spacing between letters, use the `letter_spacing_scale` parameter (1 keeps the default spacing).
+To widen or tighten the spacing between letters, use the `letter_spacing_scale` parameter (1 keeps the default spacing). When the base style is set to `Round`, you can specify `round_base_link_width` to add a small connector across the bottom of the base. This helps join letters when spaces would otherwise leave the rounded base split apart.
 
 If you need to use a font that is not available in the drop‑down lists, provide the name via `fontname1_override`, `fontname2_override`, or `fontname3_override`. A non‑empty override parameter will replace the corresponding drop‑down selection.
 
