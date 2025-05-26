@@ -49,7 +49,7 @@ special_emoji_right="";
 distance_special_char = 0.5;
 
 // Additional vertical offset for the left and right special characters in mm
-special_character_y_offset = 0;
+special_character_y_offset = 0.1;
 
 //Set upper text size (textstring1) in mm
 textsize1=16; 
