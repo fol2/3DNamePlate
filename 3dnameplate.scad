@@ -1,12 +1,11 @@
-// Author: https://makerworld.com/@Makkuro
-// Link: https://makerworld.com/en/models/436531
 // License: Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
 
 // preview[view:south west, tilt:side]
 
 // ---- 新增的全局参数 ----
-line_y_factor = 0.35; // 线条在文本垂直高度的相对位置 (0=底, 0.5=中, 1=顶) - 请根据效果调整
+line_y_factor = 0.350; // 线条在文本垂直高度的相对位置 (0=底, 0.5=中, 1=顶) - 请根据效果调整
 line_visual_thickness_2d = 1; // 交叉线条在挤出前的2D厚度，一般设为1mm即可
+line_x_offset_factor = 0.001; 
 // ---- 结束新增的全局参数 ----
 
 
@@ -562,12 +561,13 @@ module CreateTextIntersectingLine(textstr1_p, textstr2_p, textstr3_p, sizeit1_p,
     // 生成2D线条，它将被外部挤出
     // 使用 shifttext 进行水平对齐
     // Y坐标是相对于“平整后文本”的底部的
-    translate([shifttext, 0, 0]) { 
-        translate([- _line_actual_width / 2, line_center_y_in_flat_shape_coords - _line_2d_thickness_param / 2, 0])
-            square([_line_actual_width, _line_2d_thickness_param]);
+    // 计算X轴的额外偏移量
+    additional_x_offset = _line_actual_width * line_x_offset_factor;
+
+    translate([shifttext - _line_actual_width / 2 + additional_x_offset, line_center_y_in_flat_shape_coords - _line_2d_thickness_param / 2, 0]) {
+        square([_line_actual_width, _line_2d_thickness_param]);
     }
 }
-
 // REVISED module (v5) for flat-bottom hulled text
 // Adds a small positive epsilon to the cut level to shave off descender hulls.
 module flat_bottom_hull_text(textstr1_param, textstr2_param, textstr3_param, sizeit1_param, sizeit2_param, sizeit3_param, add_special_connector_arg) {
