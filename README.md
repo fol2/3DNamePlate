@@ -9,10 +9,10 @@ To widen or tighten the spacing between letters, use the `letter_spacing_scale` 
 
 If you need to use a font that is not available in the drop‑down lists, provide the name via `fontname1_override`, `fontname2_override`, or `fontname3_override`. A non‑empty override parameter will replace the corresponding drop‑down selection.
 
-Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**, and set the `emoji_font` parameter to that family name if OpenSCAD does not pick it automatically. You can also specify `emoji_font_style` (e.g. `Bold`) if your chosen emoji font provides different styles. After installing a new font, restart OpenSCAD so it becomes available in the Customizer. Emojis mixed into the text lines are automatically rendered using the configured emoji font.
+Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**, and set the `emoji_font` parameter to that family name if OpenSCAD does not pick it automatically. You can also specify `emoji_font_style` (e.g. `Bold`) if your chosen emoji font provides different styles. The `emoji_text_style` parameter lets you choose a separate style for emojis embedded inside the text strings. After installing a new font, restart OpenSCAD so it becomes available in the Customizer. Emojis mixed into the text lines are automatically rendered using the configured emoji font.
 
 Use the optional `special_character_y_offset` parameter to raise or lower the left and right special icons if they need slight vertical adjustment.
-The new `emoji_size_scale` parameter adjusts the size of emoji and icon characters relative to the text.
+The `emoji_size_scale` parameter adjusts the size of the left/right special characters. A separate `emoji_text_size_scale` control changes the size of emoji characters that appear inside the text lines.
 
 Hidden text can also be engraved on the underside of the plate. Set the text via `HiddenText` and adjust its size with `HiddenTextSize`. The new parameters `HiddenTextStyle`, `HiddenTextX`, `HiddenTextY` and `HiddenTextDepth` control the font style, position offsets and engraving depth of this secret message.
 

@@ -57,6 +57,12 @@ letter_spacing_scale=1; //[0.5:0.05:2]
 // Style for emoji font (if the selected font provides styles)
 emoji_font_style="Regular"; //["Regular","Bold","Italic"]
 
+// Style for emojis that appear inside the text strings
+emoji_text_style="<same as emoji_font_style>"; //["<same as emoji_font_style>","Regular","Bold","Italic"]
+
+// Scale factor for emoji size when used inside text strings
+emoji_text_size_scale = 1; //[0.5:0.05:2]
+
 //... and select your special characters, like a heart, etc.
 special_character_left=""; //[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen,Cogwheel,🎄,🎅🏻,🌨️,❄,🧒,🤪,🧁,🍰,🎁,🎀,🎲,🎂,🎈,🎺,🥑,🎉,🎊,📧,〽,️🧿,🌶,🔋,😂,❤,️😍,🤣,😊,🥺,🙏,💕,😭,😘,👍,😅,👏,🐵,🥰,💀,✌,️🌴,🐢,🐐,🍄,⚽,🍻,👑,📸,😬,👀,🚨,🏡,🕊,️🏆,😻,🌟,🧿,🍀,🎨,🍜,👾,🚀,💉,Clock,†,Key,Pin,Gift,Thumbs_Up,Thumbs_Down,Mail,Cake,Person,Cloud,Book,Speaking_Bubble,Puzzle_Piece,Shopping_Cart,Cloud_download,Boarding_Pass,Trashcan,Circular_Arrows,8364:Euro,8592:Left arrow,8594:Right arrow,🎵,9835:Double note,8801:Identical,9658:Thick right arrow,9668:Thick left arrow,9787:Full smiley,9786:Unfilled smiley,9788:Sun,9675:Circle,9679:Dot,9792:Female sign,9794:Male sign,9674:Diamond unfilled,9830:Diamond,9824:Spades,9827:Club,35:#,33:!,63:?,36:$,37:%,38:&,42:*,43:+,64:@,8593:Up arrow,8595:Down arrow,42779:Small up arrow,42780:Small down arrow,8734:Infinity,167:Paragraph,169:Copyright,174:Registered Trademark,189:One Half,191:Upside Down ?,216:Empty Set,215:Small x,404:Ribbon,664:Circle with dot,673:Scythe,860:Abstract ear,936:Psy,955:Lambda,960:Pi,985:Lolly,1146:Circle with poles,1161:Commas fly out,8286:Four dots,8962:Abstract house]
 
@@ -76,7 +82,7 @@ distance_special_char = 0.5;
 // Additional vertical offset for the left and right special characters in mm
 special_character_y_offset = 0.1;
 
-// Scale factor for emoji/special character size
+// Scale factor for the left/right special character size
 emoji_size_scale = 1; //[0.5:0.05:2]
 
 // Font used for emoji characters in special icons
@@ -103,6 +109,17 @@ function is_emoji_char(ch) =
 // don't provide the built-in `sum()` function
 function list_sum(v, i=0) =
     (i >= len(v)) ? 0 : v[i] + list_sum(v, i+1);
+
+// Compute the advance width of a text line taking emoji scaling into account
+function compute_text_width(str, size, normal_font) =
+    list_sum([
+        for(ch = str) let(
+            f = is_emoji_char(ch) ? emoji_font_full_text : normal_font,
+            s = is_emoji_char(ch) ? size * emoji_text_size_scale : size,
+            m = textmetrics(ch, size=s, font=f, spacing=letter_spacing_scale)
+        )
+            m.advance.x * letter_spacing_scale
+    ]);
 
 //-----------------
 /* [Hidden Text] */ 
@@ -233,7 +250,9 @@ fullfont1=str(fontname1_final,":style=",fontstyle1);
 fullfont2=str(fontname2_final,":style=",fontstyle2_final);
 fullfont3=str(fontname3_final,":style=",fontstyle3_final);
 fullfont_hidden=str(fontname_hiddentext_final,":style=",HiddenTextStyle);
-emoji_font_full=str(emoji_font,":style=",emoji_font_style);
+emoji_font_full_special=str(emoji_font,":style=",emoji_font_style);
+emoji_text_style_final=(emoji_text_style=="<same as emoji_font_style>" ? emoji_font_style : emoji_text_style);
+emoji_font_full_text=str(emoji_font,":style=",emoji_text_style_final);
 halignvalue = textalign;
 
 distance_12=(realtextsize1/2+realtextsize2/2)*distance;
@@ -265,12 +284,9 @@ cutcube_x=cutcube_x_nospecialchar+specialcharsize*((special_character_left=="5St
 
 //calc width of text using left alignment so we can reposition
 // the assembled line for center or right alignment later
-size1=textmetrics(textstring1,size=textsize1,font=fullfont1,halign="left",valign="center",spacing=letter_spacing_scale);
-xsize1=size1.advance.x;
-size2=textmetrics(textstring2,size=textsize2,font=fullfont2,halign="left",valign="center",spacing=letter_spacing_scale);
-xsize2=size2.advance.x;
-size3=textmetrics(textstring3,size=textsize3,font=fullfont3,halign="left",valign="center",spacing=letter_spacing_scale);
-xsize3=size3.advance.x;
+xsize1 = compute_text_width(textstring1, textsize1, fullfont1);
+xsize2 = compute_text_width(textstring2, textsize2, fullfont2);
+xsize3 = compute_text_width(textstring3, textsize3, fullfont3);
 textwidth=max(xsize1,xsize2,xsize3);
 shifttext=(textalign=="center")? -textwidth/2 : (textalign=="right")? -textwidth : 0;
       
@@ -407,16 +423,18 @@ module draw_text_line_with_emoji(str, size, normal_font, emoji_font)
     {
         ch = str[i];
         use_font = is_emoji_char(ch) ? emoji_font : normal_font;
+        ch_size = is_emoji_char(ch) ? size * emoji_text_size_scale : size;
 
         x_off = (i == 0) ? 0 :
             list_sum([for(j=[0:i-1]) let(prev=str[j],
                                         pf=is_emoji_char(prev) ? emoji_font : normal_font,
-                                        m=textmetrics(prev, size=size, font=pf,
+                                        prev_size = is_emoji_char(prev) ? size * emoji_text_size_scale : size,
+                                        m=textmetrics(prev, size=prev_size, font=pf,
                                                      spacing=letter_spacing_scale))
                      m.advance.x * letter_spacing_scale]);
 
         translate([x_off, 0, 0])
-            text(ch, size=size, font=use_font,
+            text(ch, size=ch_size, font=use_font,
                  halign="left", valign="center",
                  spacing=letter_spacing_scale);
     }
@@ -435,12 +453,12 @@ module writetext(textstr1, textstr2, textstr3, sizeit1, sizeit2, sizeit3, add_a_
         translate([shifttext,0,0])
         {
             translate([0,distance_line_2_to_3+distance_line_1_to_2,0])
-                draw_text_line_with_emoji(textstr1, sizeit1, fullfont1, emoji_font_full);
+                draw_text_line_with_emoji(textstr1, sizeit1, fullfont1, emoji_font_full_text);
 
             translate([0,distance_line_2_to_3,0])
-                draw_text_line_with_emoji(textstr2, sizeit2, fullfont2, emoji_font_full);
+                draw_text_line_with_emoji(textstr2, sizeit2, fullfont2, emoji_font_full_text);
 
-            draw_text_line_with_emoji(textstr3, sizeit3, fullfont3, emoji_font_full);
+            draw_text_line_with_emoji(textstr3, sizeit3, fullfont3, emoji_font_full_text);
         }
         
         translate([ 0,specialchar_y,0])
@@ -559,8 +577,8 @@ module CreateTextIntersectingLine(textstr1_p, textstr2_p, textstr3_p, sizeit1_p,
         } else { // 文本型特殊字符
             actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
                            (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
-            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
-                                 ((type(special_character_left) == "int") ? "Noto Sans" : emoji_font_full);
+            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full_special :
+                                 ((type(special_character_left) == "int") ? "Noto Sans" : emoji_font_full_special);
             min_SC_left_y = _intersect_line_calc_baseline_y(specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left);
             max_SC_left_y = _intersect_line_calc_top_y(specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left);
         }
@@ -575,8 +593,8 @@ module CreateTextIntersectingLine(textstr1_p, textstr2_p, textstr3_p, sizeit1_p,
         } else {
             actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
                            (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
-            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
-                                  ((type(special_character_right) == "int") ? "Noto Sans" : emoji_font_full);
+            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full_special :
+                                  ((type(special_character_right) == "int") ? "Noto Sans" : emoji_font_full_special);
             min_SC_right_y = _intersect_line_calc_baseline_y(specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right);
             max_SC_right_y = _intersect_line_calc_top_y(specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right);
         }
@@ -670,8 +688,8 @@ module flat_bottom_hull_text(textstr1_param, textstr2_param, textstr3_param, siz
         } else { // Text-based Special Character (emoji or chr)
             actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
                            (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
-            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
-                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full); // Font for SC
+            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full_special :
+                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full_special); // Font for SC
             baseline_SC_left_y = calculate_text_baseline_y(
                 specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left
             );
@@ -685,8 +703,8 @@ module flat_bottom_hull_text(textstr1_param, textstr2_param, textstr3_param, siz
         } else {
             actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
                            (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
-            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
-                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full); // Font for SC
+            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full_special :
+                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full_special); // Font for SC
             baseline_SC_right_y = calculate_text_baseline_y(
                 specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right
             );
@@ -763,8 +781,8 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
         } else {
             actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
                            (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
-            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
-                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full);
+            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full_special :
+                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full_special);
             baseline_SC_left_y = calculate_text_baseline_y(
                 specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left
             );
@@ -778,8 +796,8 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
         } else {
             actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
                            (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
-            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
-                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full);
+            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full_special :
+                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full_special);
             baseline_SC_right_y = calculate_text_baseline_y(
                 specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right
             );
@@ -874,8 +892,8 @@ module flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
         } else {
             _actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
                            (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
-            _actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
-                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full);
+            _actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full_special :
+                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full_special);
             _baseline_SC_left_y = _calculate_text_baseline_y(
                 specialchar_y, _actual_sc_str_left, specialcharsize, _actual_sc_font_left
             );
@@ -889,8 +907,8 @@ module flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
         } else {
             _actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
                            (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
-            _actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
-                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full);
+            _actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full_special :
+                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full_special);
             _baseline_SC_right_y = _calculate_text_baseline_y(
                 specialchar_y, _actual_sc_str_right, specialcharsize, _actual_sc_font_right
             );
@@ -1284,7 +1302,7 @@ module do_special_char(typestr,special_emoji)
     {
         echo ("FONT!", len(special_emoji), special_emoji);
         scale(.6)
-        text(special_emoji,size=specialcharsize,font=emoji_font_full,halign="center",valign="center");
+        text(special_emoji,size=specialcharsize,font=emoji_font_full_special,halign="center",valign="center");
     }
     else
     if (type(typestr) == "int")
@@ -1298,7 +1316,7 @@ module do_special_char(typestr,special_emoji)
         if (len(typestr)<3)
         {
             scale(.6)
-                text(typestr,size=specialcharsize,font=emoji_font_full,halign="center",valign="center");
+                text(typestr,size=specialcharsize,font=emoji_font_full_special,halign="center",valign="center");
         }
         else
         {
