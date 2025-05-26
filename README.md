@@ -12,6 +12,7 @@ If you need to use a font that is not available in the drop‑down lists, provid
 Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**, and set the `emoji_font` parameter to that family name if OpenSCAD does not pick it automatically. You can also specify `emoji_font_style` (e.g. `Bold`) if your chosen emoji font provides different styles. After installing a new font, restart OpenSCAD so it becomes available in the Customizer.
 
 Use the optional `special_character_y_offset` parameter to raise or lower the left and right special icons if they need slight vertical adjustment.
+The new `emoji_size_scale` parameter adjusts the size of emoji and icon characters relative to the text.
 
 Hidden text can also be engraved on the underside of the plate. Set the text via `HiddenText` and adjust its size with `HiddenTextSize`. The new parameters `HiddenTextStyle`, `HiddenTextX`, `HiddenTextY` and `HiddenTextDepth` control the font style, position offsets and engraving depth of this secret message.
 

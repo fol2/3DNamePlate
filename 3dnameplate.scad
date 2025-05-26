@@ -76,6 +76,9 @@ distance_special_char = 0.5;
 // Additional vertical offset for the left and right special characters in mm
 special_character_y_offset = 0.1;
 
+// Scale factor for emoji/special character size
+emoji_size_scale = 1; //[0.5:0.05:2]
+
 // Font used for emoji characters in special icons
 emoji_font="Noto Emoji";
 
@@ -230,9 +233,11 @@ distance_line_1_to_2=(textstring2=="" && textstring3==""?0:distance_12);
 distance_line_2_to_3=(textstring3==""?0:distance_23);
 
 
-specialcharsize = ( (textstring1 != "" ? textsize1:0) +
-                       ( (textstring2 != "") || (textstring1 != "" && textstring2 == "" &&textstring3 != "") ? textsize2:0) +
-                       (textstring3 != "" ? textsize3:0) ) ; 
+specialcharsize = (
+                       (textstring1 != "" ? textsize1 : 0) +
+                       ((textstring2 != "") || (textstring1 != "" && textstring2 == "" && textstring3 != "") ? textsize2 : 0) +
+                       (textstring3 != "" ? textsize3 : 0)
+                   ) * emoji_size_scale;
 echo("specialcharsize",specialcharsize);
 distancespecialchar = specialcharsize*distance_special_char;
 
