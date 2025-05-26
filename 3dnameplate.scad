@@ -137,13 +137,13 @@ BaseSwissCheeseWidth=50;
 
 /* [FontOptions] */
 // Select fonts and styles for the text lines
-fontname1="Noto Sans CJK HK";        //["Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname1="Noto Sans CJK HK";        //["Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
 fontstyle1="Regular";            //["Regular","Bold","Italic"]
-fontname2="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname2="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
 fontstyle2="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
-fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
 fontstyle3="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
-fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
 
 // Optional overrides to specify any installed font family directly. When non-empty,
 // these values take precedence over the dropdown selections above.
