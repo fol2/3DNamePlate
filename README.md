@@ -8,6 +8,17 @@ Open `3dnameplate.scad` in OpenSCAD and use the Customizer pane to tweak the tex
 
 Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**. After installing, restart OpenSCAD so the font becomes available in the Customizer.
 
+## OpenSCAD version and `textmetrics`
+
+This script uses the `textmetrics` function, which is available in recent OpenSCAD snapshots. Install a version that includes it and enable the feature under **Edit → Preferences → Features**.
+
+Running the script with the 2021.01 release without `textmetrics` enabled will emit warnings such as:
+
+```
+Ignoring unknown function 'textmetrics'
+```
+
+
 ## Purpose
 
 The goal of the project is to quickly create attractive curved or pedestal style name plates that can be 3D‑printed. Adjust the parameters in the script to generate a personalized STL ready for printing.
