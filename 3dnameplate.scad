@@ -19,9 +19,6 @@ bottom_epsilon = -2.0; //[-10:0.1:10]
 //-----------------
 /* [Main Parameters] */ 
 
-//Number of faces to round the sweep. TIP: Use "2" if you want to have a quick preview here in the customizer. Set to at least "10" once you generate a model for printing. 
-faces_segment = 20; //[1:20]
-
 //Set the upper text to render
 textstring1="KEEP CALM";
 
@@ -69,6 +66,9 @@ textsize2=16;
 //Set lowest text size (textstring3)in mm - if really 3 lines are used
 textsize3=16; 
 
+//Hidden text size 
+HiddenTextSize=4;
+
 //Distance between the two lines in font height
 distance=1.2;
 
@@ -87,6 +87,9 @@ cutangle=65;
 //Size of the sweep in mm, good start is 13mm so it would be nearly as big as 'textsize'
 text_excenter=13;
 
+//Number of faces to round the sweep. TIP: Use "2" if you want to have a quick preview here in the customizer. Set to at least "10" once you generate a model for printing. 
+faces_segment = 20; //[1:20]
+
 //Sweep direction
 direction="up"; //["up":text top is highest, "down": text bottom is highest]
 
@@ -101,9 +104,6 @@ border_side=5;
 
 //rounding for the rounded rectangle (additional to the baseheight!)
 Rounded_rectangle_radius=.4;
-
-//Hidden text size 
-HiddenTextSize=4;
 
 //Select this if you want to add magnets to the base
 magnettype="None"; //[None,Cube10x1,Cylinder8x3,Cylinder5x2c5,Cylinder8x1c7,Cylinder12x2c5]
