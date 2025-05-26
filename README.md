@@ -9,7 +9,7 @@ To widen or tighten the spacing between letters, use the `letter_spacing_scale` 
 
 If you need to use a font that is not available in the drop‑down lists, provide the name via `fontname1_override`, `fontname2_override`, or `fontname3_override`. A non‑empty override parameter will replace the corresponding drop‑down selection.
 
-Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**, and set the `emoji_font` parameter to that family name if OpenSCAD does not pick it automatically. You can also specify `emoji_font_style` (e.g. `Bold`) if your chosen emoji font provides different styles. After installing a new font, restart OpenSCAD so it becomes available in the Customizer. Emoji appearing directly in the text lines are detected automatically and rendered using the emoji font while other characters keep the normal font.
+Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**, and set the `emoji_font` parameter to that family name if OpenSCAD does not pick it automatically. You can also specify `emoji_font_style` (e.g. `Bold`) if your chosen emoji font provides different styles. After installing a new font, restart OpenSCAD so it becomes available in the Customizer.
 
 Use the optional `special_character_y_offset` parameter to raise or lower the left and right special icons if they need slight vertical adjustment.
 

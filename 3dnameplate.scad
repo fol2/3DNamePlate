@@ -392,38 +392,6 @@ function type(x)=
      )
 );
 
-// Simple emoji detection based on common Unicode ranges
-function is_emoji_char(ch) =
-    let(code = ord(ch))
-        (code >= 0x1F300 && code <= 0x1FAFF) ||
-        (code >= 0x2600  && code <= 0x26FF) ||
-        (code >= 0x2700  && code <= 0x27BF);
-
-// Render a single line of text, switching to the emoji font when
-// an emoji character is detected in the string.
-module text_line_with_emojis(str_line, size_line, base_font_full, halign_val) {
-    widths = [ for(i=[0:len(str_line)-1])
-                let(ch=str_line[i],
-                    font_sel = is_emoji_char(ch) ? emoji_font_full : base_font_full,
-                    m = textmetrics(text=ch, size=size_line, font=font_sel,
-                                     halign="left", valign="center",
-                                     spacing=letter_spacing_scale))
-                    m.advance.x ];
-    total_width = sum(widths);
-    start_x = (halign_val=="center") ? -total_width/2 :
-              (halign_val=="right") ? -total_width : 0;
-
-    for(i=[0:len(str_line)-1]) {
-        ch = str_line[i];
-        font_sel = is_emoji_char(ch) ? emoji_font_full : base_font_full;
-        char_offset = start_x + sum([for(j=[0:i-1]) widths[j]]);
-        translate([char_offset,0,0])
-            text(ch, size=size_line, font=font_sel,
-                 halign="left", valign="center",
-                 spacing=letter_spacing_scale);
-    }
-}
-
 
 
     
@@ -437,12 +405,12 @@ module writetext(textstr1, textstr2, textstr3, sizeit1, sizeit2, sizeit3, add_a_
         translate([shifttext,0,0])
         {
             translate([0,distance_line_2_to_3+distance_line_1_to_2,0])
-                text_line_with_emojis(textstr1,sizeit1,fullfont1,halignvalue);
-
+                text(textstr1,size=sizeit1,font=fullfont1,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
+            
             translate([0,distance_line_2_to_3,0])
-                text_line_with_emojis(textstr2,sizeit2,fullfont2,halignvalue);
-
-            text_line_with_emojis(textstr3,sizeit3,fullfont3,halignvalue);
+                text(textstr2,size=sizeit2,font=fullfont2,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
+            
+            text(textstr3,size=sizeit3,font=fullfont3,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
         }
         
         translate([ 0,specialchar_y,0])
