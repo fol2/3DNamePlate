@@ -97,8 +97,8 @@ magnet_closing_layer=0;
 /* [AdditionalSettings] */ 
 
 
-//Select part to generate (full or letter caps to print then in a second color and stick on top of the sweeping letters!)
-part_to_generate="sweeping_text";//[sweeping_text,text_caps]
+//Select part to generate (full, letter caps only or letter caps with a base)
+part_to_generate="sweeping_text";//[sweeping_text,text_caps,base_text_caps]
 
 //In case you selected "caps" above, what should be the thickness of the caps?
 letter_caps_thickness=1;
@@ -486,7 +486,7 @@ module rotate_extrude2(angle=360, convexity=2, xsize=100,yzsize=100) {
 }
 
 //------------------
-module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction="up") 
+module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction="up")
 {
     
     rotate([0,-90,0])
@@ -630,10 +630,32 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
                 }
     }
 }
+
+//------------------
+//Simple base plus raised text for printing letter caps with a small platform
+module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3)
+{
+    union()
+    {
+        // Base under the letters
+        linear_extrude(height=baseheight, convexity = 10)
+            offset(r = base_radius_add)
+                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+
+        // Raised letters on top of the base
+        translate([0,0,baseheight])
+            linear_extrude(height=letter_caps_thickness,convexity = 10)
+                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
+    }
+}
 //rotate([-90,0,180])
 if(part_to_generate=="sweeping_text")
-{   
+{
     RiseText(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3, direction);
+}
+else if(part_to_generate=="base_text_caps")
+{
+    BaseTextCaps(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3);
 }
 else
 {
