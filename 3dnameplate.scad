@@ -144,6 +144,12 @@ fontstyle2="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","I
 fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
 fontstyle3="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
 fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+
+// Optional overrides to specify any installed font family directly. When non-empty,
+// these values take precedence over the dropdown selections above.
+fontname1_override="";
+fontname2_override="";
+fontname3_override="";
 // Font used for emoji characters in special icons
 emoji_font="Noto Emoji";
 // Style for emoji font (if the selected font provides styles)
@@ -204,18 +210,19 @@ assert(tm_feature_check.size.x > 0,
            "Install a recent OpenSCAD snapshot and activate\n",
            "Edit \u2192 Preferences \u2192 Features \u2192 textmetrics"));
 
-fontname2_final = (fontname2=="<same as fontname1>" ? fontname1 : fontname2 );
-fontname3_final = (fontname3=="<same as fontname1>" ? fontname1 : fontname3 );
-fontname_hiddentext_final =(fontname_hiddentext=="<same as fontname1>"? fontname1 : fontname_hiddentext );
+fontname1_final = (fontname1_override!="" ? fontname1_override : fontname1);
+fontname2_final = (fontname2_override!="" ? fontname2_override : (fontname2=="<same as fontname1>" ? fontname1_final : fontname2));
+fontname3_final = (fontname3_override!="" ? fontname3_override : (fontname3=="<same as fontname1>" ? fontname1_final : fontname3));
+fontname_hiddentext_final = (fontname_hiddentext=="<same as fontname1>" ? fontname1_final : fontname_hiddentext);
 
 fontstyle2_final = (fontstyle2=="<same as fontstyle1>" ? fontstyle1 : fontstyle2 );
 fontstyle3_final = (fontstyle3=="<same as fontstyle1>" ? fontstyle1 : fontstyle3 );
 
-realtextsize1=textsize1*(fontname1=="Press Start 2P"?1.5:1);
-realtextsize2=textsize2*(fontname2=="Press Start 2P"?1.5:1);
-realtextsize3=textsize3*(fontname3=="Press Start 2P"?1.5:1);
+realtextsize1=textsize1*(fontname1_final=="Press Start 2P"?1.5:1);
+realtextsize2=textsize2*(fontname2_final=="Press Start 2P"?1.5:1);
+realtextsize3=textsize3*(fontname3_final=="Press Start 2P"?1.5:1);
 
-fullfont1=str(fontname1,":style=",fontstyle1);
+fullfont1=str(fontname1_final,":style=",fontstyle1);
 fullfont2=str(fontname2_final,":style=",fontstyle2_final);
 fullfont3=str(fontname3_final,":style=",fontstyle3_final);
 fullfont_hidden=str(fontname_hiddentext_final,":style=",fontstyle1);
