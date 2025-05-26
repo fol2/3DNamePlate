@@ -4,6 +4,12 @@
 
 // preview[view:south west, tilt:side]
 
+// ---- 新增的全局参数 ----
+line_y_factor = 0.35; // 线条在文本垂直高度的相对位置 (0=底, 0.5=中, 1=顶) - 请根据效果调整
+line_visual_thickness_2d = 1; // 交叉线条在挤出前的2D厚度，一般设为1mm即可
+// ---- 结束新增的全局参数 ----
+
+
 //Number of faces to round the sweep. TIP: Use "2" if you want to have a quick preview here in the customizer. Set to at least "10" once you generate a model for printing. 
 faces_segment = 20; //[1:20]
 
@@ -63,7 +69,7 @@ text_excenter=13;
 direction="up"; //["up":text top is highest, "down": text bottom is highest]
 
 //Base type, select "Round" if you want a rounded base following the texts contours. Select "Rounded_rectangle" and increase baseheight and Rounded_rectangle_radius (take care that: baseheight > 2*Rounded_rectangle_radius)
-BaseType="Round"; //[Round,Minimal_straight,Pedestal,Chamfered_rectangle,Rectangle,Rounded_rectangle]
+BaseType="Round"; //[Round,Minimal_straight,Pedestal,Chamfered_rectangle,Rectangle,Rounded_rectangle,Bottom_Line]
 
 //For the square basetype, add Border in mm to add "above" of the letters and "below" the letters
 border_topdown=3;
@@ -453,6 +459,412 @@ module square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2,
     }
 }
 
+// 辅助函数：计算文本基线Y坐标 (改编自文件内函数)
+function _intersect_line_calc_baseline_y(Text_Y_Center, Text_String, Font_Size, Font_Name_Full) =
+    (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 : // 若无效则返回极大值
+        let(
+            safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
+            metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+        )
+        (metrics.descent == undef) ? Text_Y_Center - Font_Size*0.2 : // 近似值
+        Text_Y_Center + metrics.descent; // metrics.descent 通常是负数
+
+// 辅助函数：计算文本顶线Y坐标
+function _intersect_line_calc_top_y(Text_Y_Center, Text_String, Font_Size, Font_Name_Full) =
+    (Text_String == "" || Text_String == undef || Font_Size <= 0) ? -100000 : // 若无效则返回极小值
+        let(
+            safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
+            metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+        )
+        (metrics.ascent == undef) ? Text_Y_Center + Font_Size*0.8 : // 近似值
+        Text_Y_Center + metrics.ascent;
+
+// 辅助函数：判断特殊字符是否为图标 (改编自文件内函数)
+function _intersect_line_sc_is_icon(typestr, emoji_str) =
+    !((emoji_str != "" && emoji_str != undef) ||
+      (type(typestr) == "int") ||
+      (len(typestr) < 3 && typestr != "" && typestr != undef ));
+
+module CreateTextIntersectingLine(textstr1_p, textstr2_p, textstr3_p, sizeit1_p, sizeit2_p, sizeit3_p, _line_y_factor_param, _line_2d_thickness_param) {
+
+    // --- 计算文本和特殊字符的原始垂直边界 ---
+    min_L1_y = _intersect_line_calc_baseline_y((distance_line_2_to_3 + distance_line_1_to_2), textstr1_p, sizeit1_p, fullfont1);
+    max_L1_y = _intersect_line_calc_top_y((distance_line_2_to_3 + distance_line_1_to_2), textstr1_p, sizeit1_p, fullfont1);
+
+    min_L2_y = _intersect_line_calc_baseline_y(distance_line_2_to_3, textstr2_p, sizeit2_p, fullfont2);
+    max_L2_y = _intersect_line_calc_top_y(distance_line_2_to_3, textstr2_p, sizeit2_p, fullfont2);
+
+    min_L3_y = _intersect_line_calc_baseline_y(0, textstr3_p, sizeit3_p, fullfont3);
+    max_L3_y = _intersect_line_calc_top_y(0, textstr3_p, sizeit3_p, fullfont3);
+
+    min_SC_left_y = 100000; max_SC_left_y = -100000;
+    if ((special_character_left != "" && special_character_left != undef) || (special_emoji_left != "" && special_emoji_left != undef)) {
+        if (_intersect_line_sc_is_icon(special_character_left, special_emoji_left)) {
+            // 图标：基于 specialchar_y 和 specialcharsize (作为高度)
+            // 注意: 这里的 specialcharsize 是用于特殊字符的字体大小，我们用它来近似图标高度
+            icon_h_approx = (specialcharsize > 0 ? specialcharsize : 1);
+            min_SC_left_y = specialchar_y - icon_h_approx/2;
+            max_SC_left_y = specialchar_y + icon_h_approx/2;
+        } else { // 文本型特殊字符
+            actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
+                           (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
+            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
+                                 ((type(special_character_left) == "int") ? "Noto Sans" : emoji_font_full);
+            min_SC_left_y = _intersect_line_calc_baseline_y(specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left);
+            max_SC_left_y = _intersect_line_calc_top_y(specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left);
+        }
+    }
+
+    min_SC_right_y = 100000; max_SC_right_y = -100000;
+    if ((special_character_right != "" && special_character_right != undef) || (special_emoji_right != "" && special_emoji_right != undef)) {
+        if (_intersect_line_sc_is_icon(special_character_right, special_emoji_right)) {
+            icon_h_approx = (specialcharsize > 0 ? specialcharsize : 1);
+            min_SC_right_y = specialchar_y - icon_h_approx/2;
+            max_SC_right_y = specialchar_y + icon_h_approx/2;
+        } else {
+            actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
+                           (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
+            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
+                                  ((type(special_character_right) == "int") ? "Noto Sans" : emoji_font_full);
+            min_SC_right_y = _intersect_line_calc_baseline_y(specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right);
+            max_SC_right_y = _intersect_line_calc_top_y(specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right);
+        }
+    }
+
+    overall_min_y_orig = min(min_L1_y, min_L2_y, min_L3_y, min_SC_left_y, min_SC_right_y);
+    if (overall_min_y_orig == 100000) {
+        overall_min_y_orig = 0;
+    }
+
+    overall_max_y_orig = max(max_L1_y, max_L2_y, max_L3_y, max_SC_left_y, max_SC_right_y);
+    if (overall_max_y_orig == -100000) {
+        overall_max_y_orig = (overall_min_y_orig > 0 ? overall_min_y_orig : 1); // Avoid 0 height if only min_y is 0
+    }
+
+    // `flat_bottom_text_shape` 使用的底部削减量 (raised_text_shave_epsilon = -2.0)
+    relevant_shave_epsilon = -2.0; 
+    
+    // `flat_bottom_text_shape` 切割文本的Y坐标 (在原始坐标系中)
+    cut_base_y_level_orig = overall_min_y_orig + relevant_shave_epsilon;
+
+    // 经过底部平整处理后，文本2D形状的有效高度
+    effective_text_height = max(0.1, overall_max_y_orig - cut_base_y_level_orig); // 确保至少有0.1mm的高度
+
+    // 线条中心点在“平整后文本”坐标系中的Y坐标 (0点在平整后文本的底部)
+    line_center_y_in_flat_shape_coords = effective_text_height * _line_y_factor_param;
+
+    _line_actual_width = textwidth; // 使用全局的 textwidth 作为线条宽度
+
+    // 生成2D线条，它将被外部挤出
+    // 使用 shifttext 进行水平对齐
+    // Y坐标是相对于“平整后文本”的底部的
+    translate([shifttext, 0, 0]) { 
+        translate([- _line_actual_width / 2, line_center_y_in_flat_shape_coords - _line_2d_thickness_param / 2, 0])
+            square([_line_actual_width, _line_2d_thickness_param]);
+    }
+}
+
+// REVISED module (v5) for flat-bottom hulled text
+// Adds a small positive epsilon to the cut level to shave off descender hulls.
+module flat_bottom_hull_text(textstr1_param, textstr2_param, textstr3_param, sizeit1_param, sizeit2_param, sizeit3_param, add_special_connector_arg) {
+
+    // --- Customizable Epsilon ---
+    // This value is added to the calculated lowest baseline.
+    // A small positive value raises the cutting plane slightly, which helps to
+    // shave off remnants of hulled descenders (like for 'g').
+    // This will cause all letters to be slightly embedded into the base by this amount.
+    // Set to 0 to have non-descending letters sit exactly on the base's bottom surface
+    // (but descender hulls might still visually protrude slightly, similar to v4 results).
+    // Typical values might be 0.1mm to 0.5mm depending on desired effect and model scale.
+    cut_shave_epsilon = -2; // <<<< YOU CAN TUNE THIS VALUE (e.g., 0.1, 0.3, 0.05)
+    // ---
+
+    // Helper to calculate baseline Y for text elements using textmetrics
+    function calculate_text_baseline_y(Text_Y_Center, Text_String, Font_Size, Font_Name_Full) =
+        (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 : // Inactive or invalid
+            let(
+                // Ensure Font_Name_Full is valid, provide a common fallback for textmetrics
+                safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
+                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+            )
+            // If metrics.descent or .ascent is undef (e.g., font not found, or text empty for metrics),
+            // fallback to a rough estimate of bottom.
+            (metrics.descent == undef || metrics.ascent == undef) ? Text_Y_Center - Font_Size/2 : 
+            Text_Y_Center - (metrics.ascent + metrics.descent) / 2; // Baseline calculation
+
+    // Determine baselines for each text line (globals: distance_..., fullfont1, etc.)
+    baseline_L1_y = calculate_text_baseline_y(
+        (distance_line_2_to_3 + distance_line_1_to_2), textstr1_param, sizeit1_param, fullfont1
+    );
+    baseline_L2_y = calculate_text_baseline_y(
+        distance_line_2_to_3, textstr2_param, sizeit2_param, fullfont2
+    );
+    baseline_L3_y = calculate_text_baseline_y(
+        0, textstr3_param, sizeit3_param, fullfont3
+    );
+
+    // Helper to determine if a special character typestring refers to an icon
+    function sc_is_icon(typestr, emoji_str) =
+        !((emoji_str != "" && emoji_str != undef) || // It's an emoji string
+          (type(typestr) == "int") ||                 // It's an int for chr()
+          (len(typestr) < 3 && typestr != "" && typestr != undef )); // It's a short text/emoji, not an icon name
+
+    // Baselines/visual bottoms for special characters (globals: specialchar_y, specialcharsize, etc.)
+    baseline_SC_left_y = 100000;
+    if ((special_character_left != "" && special_character_left != undef) || (special_emoji_left != "" && special_emoji_left != undef)) {
+        if (sc_is_icon(special_character_left, special_emoji_left)) {
+            // Icon: visual bottom is assumed to be CenterY - Height/2 (Height = specialcharsize)
+            baseline_SC_left_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else { // Text-based Special Character (emoji or chr)
+            actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
+                           (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
+            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
+                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full); // Font for SC
+            baseline_SC_left_y = calculate_text_baseline_y(
+                specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left
+            );
+        }
+    }
+
+    baseline_SC_right_y = 100000; // Similar logic for right SC
+    if ((special_character_right != "" && special_character_right != undef) || (special_emoji_right != "" && special_emoji_right != undef)) {
+        if (sc_is_icon(special_character_right, special_emoji_right)) {
+            baseline_SC_right_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else {
+            actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
+                           (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
+            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
+                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full); // Font for SC
+            baseline_SC_right_y = calculate_text_baseline_y(
+                specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right
+            );
+        }
+    }
+    
+    // Determine the lowest point among all calculated baselines/visual bottoms.
+    determined_lowest_baseline = min(baseline_L1_y, baseline_L2_y, baseline_L3_y, baseline_SC_left_y, baseline_SC_right_y);
+    
+    if (determined_lowest_baseline == 100000) { // Handle case of no text/SC at all
+        determined_lowest_baseline = 0; 
+    }
+
+    // The final Y-level for the cut is the lowest baseline PLUS the shave epsilon.
+    // This raises the cutting plane slightly to shave off hulled descenders.
+    final_cut_y_level = determined_lowest_baseline + cut_shave_epsilon;
+
+    // Perform the intersection
+    intersection() {
+        hull()
+            writetext(textstr1_param, textstr2_param, textstr3_param, sizeit1_param, sizeit2_param, sizeit3_param, add_special_connector_arg);
+        
+        // Cutting rectangle: its bottom edge is now at final_cut_y_level
+        cutting_rect_width = 1000;  // Ensure this is wider than any possible text
+        cutting_rect_height = 500; // Ensure this is taller than any text from the cut line upwards
+        
+        translate([-cutting_rect_width/2, final_cut_y_level, 0]) 
+            square([cutting_rect_width, cutting_rect_height]);
+    }
+}
+
+// NEW module (v1) for flat-bottom TEXT SHAPES (NO HULL)
+// Creates text using writetext and then cuts its bottom flat.
+module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, sizeit1_param, sizeit2_param, sizeit3_param, add_special_connector_arg) {
+
+    // --- Customizable Epsilon for Raised Text ---
+    // This value is added to the calculated lowest baseline of the raised text.
+    // - Set to 0 to have non-descending letters sit exactly on their baseline.
+    // - A small positive value will make them slightly embedded/shaved at the bottom.
+    // - A small negative value might be needed if textmetrics seems to place baseline slightly too high visually.
+    // Tune this for the best visual fit of raised letters on the base.
+    raised_text_shave_epsilon = -2.0; // <<<< TUNE THIS for raised letters (e.g., 0.0, 0.1, -0.05)
+    // ---
+
+    // Helper to calculate baseline Y for text elements using textmetrics
+    function calculate_text_baseline_y(Text_Y_Center, Text_String, Font_Size, Font_Name_Full) =
+        (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 :
+            let(
+                safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
+                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+            )
+            (metrics.descent == undef || metrics.ascent == undef) ? Text_Y_Center - Font_Size/2 : 
+            Text_Y_Center - (metrics.ascent + metrics.descent) / 2;
+
+    baseline_L1_y = calculate_text_baseline_y(
+        (distance_line_2_to_3 + distance_line_1_to_2), textstr1_param, sizeit1_param, fullfont1
+    );
+    baseline_L2_y = calculate_text_baseline_y(
+        distance_line_2_to_3, textstr2_param, sizeit2_param, fullfont2
+    );
+    baseline_L3_y = calculate_text_baseline_y(
+        0, textstr3_param, sizeit3_param, fullfont3
+    );
+
+    function sc_is_icon(typestr, emoji_str) =
+        !((emoji_str != "" && emoji_str != undef) ||
+          (type(typestr) == "int") ||
+          (len(typestr) < 3 && typestr != "" && typestr != undef ));
+
+    baseline_SC_left_y = 100000;
+    if ((special_character_left != "" && special_character_left != undef) || (special_emoji_left != "" && special_emoji_left != undef)) {
+        if (sc_is_icon(special_character_left, special_emoji_left)) {
+            baseline_SC_left_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else {
+            actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
+                           (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
+            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
+                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full);
+            baseline_SC_left_y = calculate_text_baseline_y(
+                specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left
+            );
+        }
+    }
+
+    baseline_SC_right_y = 100000;
+    if ((special_character_right != "" && special_character_right != undef) || (special_emoji_right != "" && special_emoji_right != undef)) {
+        if (sc_is_icon(special_character_right, special_emoji_right)) {
+            baseline_SC_right_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else {
+            actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
+                           (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
+            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
+                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full);
+            baseline_SC_right_y = calculate_text_baseline_y(
+                specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right
+            );
+        }
+    }
+    
+    determined_lowest_baseline = min(baseline_L1_y, baseline_L2_y, baseline_L3_y, baseline_SC_left_y, baseline_SC_right_y);
+    if (determined_lowest_baseline == 100000) {
+        determined_lowest_baseline = 0; 
+    }
+
+    final_cut_y_level = determined_lowest_baseline + raised_text_shave_epsilon; // Uses its own epsilon
+
+    // Perform the intersection (NO HULL here)
+    intersection() {
+        writetext(textstr1_param, textstr2_param, textstr3_param, sizeit1_param, sizeit2_param, sizeit3_param, add_special_connector_arg);
+        
+        cutting_rect_width = 1000; 
+        cutting_rect_height = 500;
+        
+        translate([-cutting_rect_width/2, final_cut_y_level, 0]) 
+            square([cutting_rect_width, cutting_rect_height]);
+    }
+}
+
+// NEW module (v1) to flatten the ACTUAL bottom of any 2D child object
+// It finds the minimum Y of the child's bounding box and cuts at/slightly above that.
+module flatten_bottom_of_child(shave_epsilon = 0.0) {
+    // Important: This module expects its child to be a 2D shape already positioned
+    // correctly in the XY plane (e.g., after writetext, offset, hull, etc.).
+
+    // Render the child to get its bounds.
+    // Note: bounds_of() is not a standard OpenSCAD feature.
+    // We'll achieve a similar effect by projecting and then using intersection
+    // with a rectangle whose position is determined by visual inspection or estimation
+    // if bounds cannot be dynamically calculated easily without external libraries.
+
+    // Given OpenSCAD limitations on dynamic bounding box calculations for complex children
+    // without relying on projection (which itself can be tricky for this purpose),
+    // a common strategy for this kind of "post-process flattening" is to
+    // intersect the child with a large rectangle whose bottom edge is manually
+    // or semi-manually determined to be the desired flat bottom.
+
+    // For this specific case of an offset shape, the lowest point will still be
+    // related to the lowest point of the original text.
+    // Let's reuse the text-baseline calculation logic from flat_bottom_text_shape
+    // for the text *before* offset, and use that as the target cut level.
+    // This assumes the parameters passed to this module scope are the text parameters.
+
+    // --- Epsilon for flattening the child object ---
+    // This is added to the calculated lowest baseline of the *original text*
+    // that formed the child.
+    child_shave_epsilon = shave_epsilon; // Use passed-in shave_epsilon
+    // ---
+
+    // Re-calculate baselines like in flat_bottom_text_shape to find the
+    // intended bottom of the original text elements.
+    // These refer to global text parameters (textstring1, sizeit1, etc. from parent scope)
+    // This is a bit of a hack – ideally the child itself would carry its properties.
+    // Assuming textstr1_param etc. are available from the calling scope of BaseTextCaps->RiseText
+    _textstr1 = textstring1; _textstr2 = textstring2; _textstr3 = textstring3;
+    _sizeit1 = textsize1; _sizeit2 = textsize2; _sizeit3 = textsize3;
+
+    function _calculate_text_baseline_y(Text_Y_Center, Text_String, Font_Size, Font_Name_Full) =
+        (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 :
+            let(
+                safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
+                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+            )
+            (metrics.descent == undef || metrics.ascent == undef) ? Text_Y_Center - Font_Size/2 : 
+            Text_Y_Center - (metrics.ascent + metrics.descent) / 2;
+
+    _baseline_L1_y = _calculate_text_baseline_y(
+        (distance_line_2_to_3 + distance_line_1_to_2), _textstr1, _sizeit1, fullfont1
+    );
+    _baseline_L2_y = _calculate_text_baseline_y(
+        distance_line_2_to_3, _textstr2, _sizeit2, fullfont2
+    );
+    _baseline_L3_y = _calculate_text_baseline_y(
+        0, _textstr3, _sizeit3, fullfont3
+    );
+
+    function _sc_is_icon(typestr, emoji_str) =
+        !((emoji_str != "" && emoji_str != undef) ||
+          (type(typestr) == "int") ||
+          (len(typestr) < 3 && typestr != "" && typestr != undef ));
+
+    _baseline_SC_left_y = 100000;
+    if ((special_character_left != "" && special_character_left != undef) || (special_emoji_left != "" && special_emoji_left != undef)) {
+        if (_sc_is_icon(special_character_left, special_emoji_left)) {
+            _baseline_SC_left_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else {
+            _actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
+                           (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
+            _actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full :
+                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full);
+            _baseline_SC_left_y = _calculate_text_baseline_y(
+                specialchar_y, _actual_sc_str_left, specialcharsize, _actual_sc_font_left
+            );
+        }
+    }
+
+    _baseline_SC_right_y = 100000;
+    if ((special_character_right != "" && special_character_right != undef) || (special_emoji_right != "" && special_emoji_right != undef)) {
+        if (_sc_is_icon(special_character_right, special_emoji_right)) {
+            _baseline_SC_right_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else {
+            _actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
+                           (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
+            _actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full :
+                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full);
+            _baseline_SC_right_y = _calculate_text_baseline_y(
+                specialchar_y, _actual_sc_str_right, specialcharsize, _actual_sc_font_right
+            );
+        }
+    }
+    
+    _determined_lowest_baseline = min(_baseline_L1_y, _baseline_L2_y, _baseline_L3_y, _baseline_SC_left_y, _baseline_SC_right_y);
+    if (_determined_lowest_baseline == 100000) {
+        _determined_lowest_baseline = 0; 
+    }
+
+    _final_cut_y_level = _determined_lowest_baseline + child_shave_epsilon;
+
+    // Perform the intersection on the child object
+    intersection() {
+        children(0); // The 2D shape passed to this module (e.g., the result of offset())
+        
+        // Cutting rectangle
+        _cutting_rect_width = 1000; 
+        _cutting_rect_height = 500;
+        
+        translate([-_cutting_rect_width/2, _final_cut_y_level, 0]) 
+            square([_cutting_rect_width, _cutting_rect_height]);
+    }
+}
+
 //------------------
 //from "thehans" http://forum.openscad.org/template/NamlServlet.jtp?macro=user_nodes&user=1218
 
@@ -633,21 +1045,78 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
 
 //------------------
 //Simple base plus raised text for printing letter caps with a small platform
+// ... (确保上面的辅助函数和 CreateTextIntersectingLine 模块已定义) ...
+
 module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3)
 {
     union()
     {
-        // Base under the letters
-        linear_extrude(height=baseheight, convexity = 10)
-            offset(r = base_radius_add)
-                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+        // --- 第一部分：实际的“底座”（通过 baseheight 挤出） ---
+        if(BaseType=="Minimal_straight") {
+            linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                flat_bottom_hull_text(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
+        } else if(BaseType=="Rectangle" || BaseType=="Rounded_rectangle") {
+            if(BaseType=="Rectangle")
+                square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight);
+            else
+                minkowski()
+                {
+                    translate([Rounded_rectangle_radius,Rounded_rectangle_radius,Rounded_rectangle_radius])
+                        sphere(r=Rounded_rectangle_radius,$fn=28);
+                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight-2*Rounded_rectangle_radius);
+                }
+        } else if(BaseType=="Chamfered_rectangle") {
+            minkowski()
+            {
+                straightpart=.4;
+                square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
+                cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
+            }
+        } else if(BaseType=="Pedestal") {
+            minkowski()
+            {
+                path_pts = [[0, 0],[1, 0],[0, 1]];
+                straightpart=.4;
+                square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
+                extrude_height=baseheight-straightpart;
+                rotate([90,0,-90])
+                    linear_extrude(height=.01, convexity = 5)
+                        scale(extrude_height)
+                            polygon(path_pts);
+            }
+        } else if(BaseType=="Round") {
+            linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                flatten_bottom_of_child(shave_epsilon = -1.5) { // You can tune this 0.2
+                    offset(r = base_radius_add) 
+                    {
+                        writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                    }
+                }
+        } else if(BaseType=="Bottom_Line") {
+            
+        }
 
-        // Raised letters on top of the base
-        translate([0,0,baseheight])
-            linear_extrude(height=letter_caps_thickness,convexity = 10)
-                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
+        // --- 第二部分：凸起的字母 (以及与之交叉的线条) ---
+        // 整体向上平移 baseheight，然后挤出 letter_caps_thickness 厚度
+        translate([0,0,baseheight]) {
+            linear_extrude(height=letter_caps_thickness, convexity = 10) {
+                // 1. 生成主要的文本字符 (底部已平整)
+                flat_bottom_text_shape(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
+
+                // 2. 如果 BaseType 是 "Bottom_Line"，则添加与之交叉的线条
+                if (BaseType == "Bottom_Line") {
+                    // 调用新模块来生成2D线条，它将和文本一起被挤出
+                    // 注意这里的参数：textsize1等是输入给BaseTextCaps的，
+                    // CreateTextIntersectingLine内部会处理realtextsize的获取 (通过全局变量)
+                    CreateTextIntersectingLine(textstr1, textstr2, textstr3, 
+                                               textsize1, textsize2, textsize3, 
+                                               line_y_factor, line_visual_thickness_2d);
+                }
+            }
+        }
     }
 }
+
 //rotate([-90,0,180])
 if(part_to_generate=="sweeping_text")
 {
