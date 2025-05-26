@@ -125,7 +125,7 @@ baseheight=1;
 base_radius_add=3.5;
 
 //Thickness of horizontal link bars for a round base (0 disables)
-round_base_link_thickness=1.5; //[0:0.1:5]
+round_base_link_thickness=1.5; //[0:1:20]
 
 //For the square basetype, add Border in mm to add "above" of the letters and "below" the letters
 border_topdown=3;
