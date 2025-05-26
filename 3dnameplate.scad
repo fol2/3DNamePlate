@@ -110,15 +110,15 @@ BaseSwissCheeseHoleD=0;
 BaseSwissCheeseLength=80;
 BaseSwissCheeseWidth=50;
 
-/* [Hidden] */
-// hide the font setting because only one font is supported for now.
-fontname1="Noto Sans SC"; 
-fontstyle1="Regular";
-fontname2="<same as fontname1>";
-fontstyle2="<same as fontstyle1>";
-fontname3="<same as fontname1>";
-fontstyle3="<same as fontstyle1>";
-fontname_hiddentext="<same as fontname1>"; 
+/* [FontOptions] */
+// Select fonts and styles for the text lines
+fontname1="Noto Sans SC";        //["Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif"]
+fontstyle1="Regular";            //["Regular","Bold","Italic"]
+fontname2="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif"]
+fontstyle2="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
+fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif"]
+fontstyle3="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
+fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif"]
 
 
 /* [Hidden] */
@@ -181,6 +181,7 @@ realtextsize3=textsize3*(fontname3=="Press Start 2P"?1.5:1);
 fullfont1=str(fontname1,":style=",fontstyle1);
 fullfont2=str(fontname2_final,":style=",fontstyle2_final);
 fullfont3=str(fontname3_final,":style=",fontstyle3_final);
+fullfont_hidden=str(fontname_hiddentext_final,":style=",fontstyle1);
 halignvalue = textalign;
 
 distance_12=(realtextsize1/2+realtextsize2/2)*distance;
@@ -612,7 +613,7 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
                         translate([0,0,-.01])
                             linear_extrude(height=min(baseheight/2,1), twist=0, slices=1, $fn=32, convexity = 5)       
                                 scale([-1,1,1])
-                                    text(HiddenText,size=HiddenTextSize,font=fontname_hiddentext_final,halign="center",valign="center");      
+                                    text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center");
                 }
     }
 }
