@@ -27,6 +27,13 @@ HiddenText="";
 
 textalign="left"; // [center:left:right]
 
+//Primary colors for the generated model (RGB 0-255)
+text_color = [255, 255, 255]; //[color]
+base_color = [204, 204, 204]; //[color]
+
+//Utility: convert 0-255 RGB values to the 0-1 range expected by color()
+function rgb255(c) = [for(i=[0:len(c)-1]) (i < 3 ? c[i]/255 : c[i])];
+
 //... and select your special characters, like a heart, etc.
 special_character_left="👑"; //[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen,Cogwheel,🎄,🎅🏻,🌨️,❄,🧒,🤪,🧁,🍰,🎁,🎀,🎲,🎂,🎈,🎺,🥑,🎉,🎊,📧,〽,️🧿,🌶,🔋,😂,❤,️😍,🤣,😊,🥺,🙏,💕,😭,😘,👍,😅,👏,🐵,🥰,💀,✌,️🌴,🐢,🐐,🍄,⚽,🍻,👑,📸,😬,👀,🚨,🏡,🕊,️🏆,😻,🌟,🧿,🍀,🎨,🍜,👾,🚀,💉,Clock,†,Key,Pin,Gift,Thumbs_Up,Thumbs_Down,Mail,Cake,Person,Cloud,Book,Speaking_Bubble,Puzzle_Piece,Shopping_Cart,Cloud_download,Boarding_Pass,Trashcan,Circular_Arrows,8364:Euro,8592:Left arrow,8594:Right arrow,🎵,9835:Double note,8801:Identical,9658:Thick right arrow,9668:Thick left arrow,9787:Full smiley,9786:Unfilled smiley,9788:Sun,9675:Circle,9679:Dot,9792:Female sign,9794:Male sign,9674:Diamond unfilled,9830:Diamond,9824:Spades,9827:Club,35:#,33:!,63:?,36:$,37:%,38:&,42:*,43:+,64:@,8593:Up arrow,8595:Down arrow,42779:Small up arrow,42780:Small down arrow,8734:Infinity,167:Paragraph,169:Copyright,174:Registered Trademark,189:One Half,191:Upside Down ?,216:Empty Set,215:Small x,404:Ribbon,664:Circle with dot,673:Scythe,860:Abstract ear,936:Psy,955:Lambda,960:Pi,985:Lolly,1146:Circle with poles,1161:Commas fly out,8286:Four dots,8962:Abstract house]
 //...paste an emoji in the text field below (this field overrides the one above!): 🥳🧁🍰🎁
@@ -903,7 +910,8 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
     
     rotate([0,-90,0])
     {
-        
+
+        color(rgb255(text_color))
         difference()
         {
             union()
@@ -928,6 +936,7 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
         }
         
         //create base
+        color(rgb255(base_color))
         translate([(direction=="up"?-1:0)*baseheight, (direction=="up"?text_excenter:specialchar_y*2+text_excenter) , 0])
             rotate([0,(direction=="up"?1:-1)*90,0])scale([1,(direction=="up"?1:-1),1])
                 difference()
@@ -1052,6 +1061,8 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
     union()
     {
         // --- 第一部分：实际的“底座”（通过 baseheight 挤出） ---
+        color(rgb255(base_color))
+        {
         if(BaseType=="Minimal_straight") {
             linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
                 flat_bottom_hull_text(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
@@ -1093,12 +1104,14 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
                     }
                 }
         } else if(BaseType=="Bottom_Line") {
-            
+
+        }
         }
 
         // --- 第二部分：凸起的字母 (以及与之交叉的线条) ---
         // 整体向上平移 baseheight，然后挤出 letter_caps_thickness 厚度
         translate([0,0,baseheight]) {
+            color(rgb255(text_color))
             linear_extrude(height=letter_caps_thickness, convexity = 10) {
                 // 1. 生成主要的文本字符 (底部已平整)
                 flat_bottom_text_shape(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
@@ -1128,8 +1141,9 @@ else if(part_to_generate=="base_text_caps")
 }
 else
 {
-    linear_extrude(height=letter_caps_thickness,convexity = 10)
-        writetext(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
+    color(rgb255(text_color))
+        linear_extrude(height=letter_caps_thickness,convexity = 10)
+            writetext(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
 }
 
 
