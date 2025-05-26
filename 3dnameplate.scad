@@ -164,8 +164,16 @@ You are free to:
 */
 
 
-faces = faces_segment*360/cutangle; 
+faces = faces_segment*360/cutangle;
 //echo (faces);
+
+//------------------------------------------------------------
+// Verify that the textmetrics() feature is available
+tm_feature_check = textmetrics("test", size = 1);
+assert(tm_feature_check.size.x > 0,
+       str("ERROR: textmetrics() feature not enabled.\n",
+           "Install a recent OpenSCAD snapshot and activate\n",
+           "Edit \u2192 Preferences \u2192 Features \u2192 textmetrics"));
 
 fontname2_final = (fontname2=="<same as fontname1>" ? fontname1 : fontname2 );
 fontname3_final = (fontname3=="<same as fontname1>" ? fontname1 : fontname3 );
@@ -1112,26 +1120,9 @@ module bezier_polygon(points) {
 	polygon(bezier_coordinates(points, steps));
 }
 
-//------ check textmetrics
-
+//------ check textmetrics availability at the end for user feedback
 test=textmetrics("test",size=8);
 if(test.size.x>0)
 {
     echo("All good. Textmetrics option is activated.");
-}
-else
-{
-    echo("*****************************************************");
-    echo("*****************************************************");
-    echo("**");
-    echo("**   ERROR: Textmetrics option is not activated!");
-    echo("**");
-    echo("**   To fix this:");
-    echo("**    - Install latest OpenSCAD snapshot:");
-    echo("**      https://openscad.org/downloads.html#snapshots");
-    echo("**    - Activate textmetrics via"); 
-    echo("**      Edit → Preferences → Features → textmetrics");
-    echo("**");
-    echo("*****************************************************");
-    echo("*****************************************************");
 }
