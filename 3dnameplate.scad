@@ -89,6 +89,18 @@ base_color = [204, 204, 204]; //[color]
 //Utility: convert 0-255 RGB values to the 0-1 range expected by color()
 function rgb255(c) = [for(i=[0:len(c)-1]) (i < 3 ? c[i]/255 : c[i])];
 
+// Determine if a character should be rendered using the emoji font
+// by checking its Unicode code point against common emoji ranges
+function is_emoji_char(ch) =
+    let(cp = ord(ch))
+        (cp >= 0x1F000 && cp <= 0x1FAFF) ||
+        (cp >= 0x2600  && cp <= 0x26FF);
+
+// Fallback implementation of list summation for older OpenSCAD releases that
+// don't provide the built-in `sum()` function
+function list_sum(v, i=0) =
+    (i >= len(v)) ? 0 : v[i] + list_sum(v, i+1);
+
 //-----------------
 /* [Hidden Text] */ 
 //Hidden text under the base (in case you need it), settings are way below.
@@ -246,27 +258,16 @@ specialchar_y = specialchar_y_base + special_character_y_offset;
 cutcube_x_nospecialchar=max((len(textstring1)+1)*realtextsize1,(len(textstring2)+1)*realtextsize2,(len(textstring3)+1)*realtextsize3); 
 cutcube_x=cutcube_x_nospecialchar+specialcharsize*((special_character_left=="5Star"||special_character_right=="5Star")?5:1)+distancespecialchar; 
 
-//calc width of text
-size1=textmetrics(textstring1,size=textsize1,font=fullfont1,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
-//ECHO: { position = [-74.0898, -8.51968]; size = [76.6539, 17.0394]; ascent = 16.6298; descent = -0.4096; offset = [-75.7998, -8.11008]; advance = [75.7998, 0]; 
-xsize1=size1.size.x;
-xpos1=size1.position.x;
-size2=textmetrics(textstring2,size=textsize2,font=fullfont2,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
-xsize2=size2.size.x;
-xpos2=size2.position.x;
-size3=textmetrics(textstring3,size=textsize3,font=fullfont3,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
-xsize3=size3.size.x;
-xpos3=size3.position.x;
-textminx=min(xpos1,xpos2,xpos3);
+//calc width of text using left alignment so we can reposition
+// the assembled line for center or right alignment later
+size1=textmetrics(textstring1,size=textsize1,font=fullfont1,halign="left",valign="center",spacing=letter_spacing_scale);
+xsize1=size1.advance.x;
+size2=textmetrics(textstring2,size=textsize2,font=fullfont2,halign="left",valign="center",spacing=letter_spacing_scale);
+xsize2=size2.advance.x;
+size3=textmetrics(textstring3,size=textsize3,font=fullfont3,halign="left",valign="center",spacing=letter_spacing_scale);
+xsize3=size3.advance.x;
 textwidth=max(xsize1,xsize2,xsize3);
-echo(textwidth);
-shifttext= -textminx-textwidth/2;
-//(textalign=="right"?textwidth/2:
-           //(textalign=="left"?-textwidth/2:
-           //(textalign=="center"?0:0)));
-echo(size1);
-echo(size2);
-echo(size3);
+shifttext=(textalign=="center")? -textwidth/2 : (textalign=="right")? -textwidth : 0;
       
 
 //************** todo
@@ -389,8 +390,32 @@ function type(x)=
              s[0]=="[" && s[len(s)-1]=="]"
              && all( [ for(x=s2) isint(int(x)) ] )? "range"
              : "unknown"
-     )
+    )
 );
+
+// Render a text line character by character so emoji glyphs can use a
+// different font. Advance widths are computed per character using
+// textmetrics().
+module draw_text_line_with_emoji(str, size, normal_font, emoji_font)
+{
+    for(i = [0 : len(str)-1])
+    {
+        ch = str[i];
+        use_font = is_emoji_char(ch) ? emoji_font : normal_font;
+
+        x_off = (i == 0) ? 0 :
+            list_sum([for(j=[0:i-1]) let(prev=str[j],
+                                        pf=is_emoji_char(prev) ? emoji_font : normal_font,
+                                        m=textmetrics(prev, size=size, font=pf,
+                                                     spacing=letter_spacing_scale))
+                     m.advance.x * letter_spacing_scale]);
+
+        translate([x_off, 0, 0])
+            text(ch, size=size, font=use_font,
+                 halign="left", valign="center",
+                 spacing=letter_spacing_scale);
+    }
+}
 
 
 
@@ -405,12 +430,12 @@ module writetext(textstr1, textstr2, textstr3, sizeit1, sizeit2, sizeit3, add_a_
         translate([shifttext,0,0])
         {
             translate([0,distance_line_2_to_3+distance_line_1_to_2,0])
-                text(textstr1,size=sizeit1,font=fullfont1,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
-            
+                draw_text_line_with_emoji(textstr1, sizeit1, fullfont1, emoji_font_full);
+
             translate([0,distance_line_2_to_3,0])
-                text(textstr2,size=sizeit2,font=fullfont2,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
-            
-            text(textstr3,size=sizeit3,font=fullfont3,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
+                draw_text_line_with_emoji(textstr2, sizeit2, fullfont2, emoji_font_full);
+
+            draw_text_line_with_emoji(textstr3, sizeit3, fullfont3, emoji_font_full);
         }
         
         translate([ 0,specialchar_y,0])
