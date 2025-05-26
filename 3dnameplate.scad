@@ -1088,50 +1088,56 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
     {
         // --- 第一部分：实际的“底座”（通过 baseheight 挤出） ---
         color(rgb255(base_color))
-        {
-        if(BaseType=="Minimal_straight") {
-            linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
-                flat_bottom_hull_text(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
-        } else if(BaseType=="Rectangle" || BaseType=="Rounded_rectangle") {
-            if(BaseType=="Rectangle")
-                square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight);
-            else
+        difference() {
+            if(BaseType=="Minimal_straight") {
+                linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                    flat_bottom_hull_text(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
+            } else if(BaseType=="Rectangle" || BaseType=="Rounded_rectangle") {
+                if(BaseType=="Rectangle")
+                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight);
+                else
+                    minkowski()
+                    {
+                        translate([Rounded_rectangle_radius,Rounded_rectangle_radius,Rounded_rectangle_radius])
+                            sphere(r=Rounded_rectangle_radius,$fn=28);
+                        square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight-2*Rounded_rectangle_radius);
+                    }
+            } else if(BaseType=="Chamfered_rectangle") {
                 minkowski()
                 {
-                    translate([Rounded_rectangle_radius,Rounded_rectangle_radius,Rounded_rectangle_radius])
-                        sphere(r=Rounded_rectangle_radius,$fn=28);
-                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight-2*Rounded_rectangle_radius);
+                    straightpart=.4;
+                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
+                    cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
                 }
-        } else if(BaseType=="Chamfered_rectangle") {
-            minkowski()
-            {
-                straightpart=.4;
-                square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
-                cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
-            }
-        } else if(BaseType=="Pedestal") {
-            minkowski()
-            {
-                path_pts = [[0, 0],[1, 0],[0, 1]];
-                straightpart=.4;
-                square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
-                extrude_height=baseheight-straightpart;
-                rotate([90,0,-90])
-                    linear_extrude(height=.01, convexity = 5)
-                        scale(extrude_height)
-                            polygon(path_pts);
-            }
-        } else if(BaseType=="Round") {
-            linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
-                flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
-                    offset(r = base_radius_add) 
-                    {
-                        writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+            } else if(BaseType=="Pedestal") {
+                minkowski()
+                {
+                    path_pts = [[0, 0],[1, 0],[0, 1]];
+                    straightpart=.4;
+                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
+                    extrude_height=baseheight-straightpart;
+                    rotate([90,0,-90])
+                        linear_extrude(height=.01, convexity = 5)
+                            scale(extrude_height)
+                                polygon(path_pts);
+                }
+            } else if(BaseType=="Round") {
+                linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                    flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
+                        offset(r = base_radius_add)
+                        {
+                            writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                        }
                     }
-                }
-        } else if(BaseType=="Bottom_Line") {
+            } else if(BaseType=="Bottom_Line") {
 
-        }
+            }
+
+            if (HiddenText!="")
+                translate([0,0,-.01])
+                    linear_extrude(height=min(baseheight/2,1), twist=0, slices=1, $fn=32, convexity = 5)
+                        scale([-1,1,1])
+                            text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center",spacing=letter_spacing_scale);
         }
 
         // --- 第二部分：凸起的字母 (以及与之交叉的线条) ---
