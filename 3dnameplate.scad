@@ -124,6 +124,9 @@ baseheight=1;
 //set base increase to make letters meet, good start is 'textsize/10'
 base_radius_add=3.5;
 
+//Thickness of horizontal link bars for a round base (0 disables)
+round_base_link_thickness=1.5; //[0:0.1:5]
+
 //For the square basetype, add Border in mm to add "above" of the letters and "below" the letters
 border_topdown=3;
 
@@ -1111,9 +1114,25 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
                 } else if(BaseType=="Round") {
                     linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
                         flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
-                            offset(r = base_radius_add)
-                            {
-                                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                            union() {
+                                offset(r = base_radius_add)
+                                {
+                                    writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                                }
+                                if (round_base_link_thickness > 0) {
+                                    if (textstr1 != "")
+                                        translate([shifttext + xpos1 + xsize1/2,
+                                                   distance_line_2_to_3 + distance_line_1_to_2])
+                                            square([xsize1, round_base_link_thickness], center=true);
+                                    if (textstr2 != "")
+                                        translate([shifttext + xpos2 + xsize2/2,
+                                                   distance_line_2_to_3])
+                                            square([xsize2, round_base_link_thickness], center=true);
+                                    if (textstr3 != "")
+                                        translate([shifttext + xpos3 + xsize3/2,
+                                                   0])
+                                            square([xsize3, round_base_link_thickness], center=true);
+                                }
                             }
                         }
                 } else if(BaseType=="Bottom_Line") {
