@@ -14,7 +14,7 @@ line_x_offset_factor = 0.01;  //[-1:0.01:1]
 // 线条宽度缩放因子，1.01表示增加1%的宽度
 line_width_scale_factor = 1.01;  //[0.1:0.01:10]
 // Bottom epsilon used to slightly shave the text's bottom
-bottom_epsilon = -2.0;
+bottom_epsilon = -2.0; //[-10:0.1:10]
 
 //-----------------
 /* [Main Parameters] */ 
