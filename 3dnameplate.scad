@@ -112,15 +112,17 @@ BaseSwissCheeseWidth=50;
 
 /* [FontOptions] */
 // Select fonts and styles for the text lines
-fontname1="Noto Sans SC";        //["Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname1="Noto Sans CJK HK";        //["Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
 fontstyle1="Regular";            //["Regular","Bold","Italic"]
-fontname2="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname2="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
 fontstyle2="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
-fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
 fontstyle3="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
-fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans SC","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
+fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie"]
 // Font used for emoji characters in special icons
 emoji_font="Noto Emoji";
+// Style for emoji font (if the selected font provides styles)
+emoji_font_style="Regular"; //["Regular","Bold","Italic"]
 
 
 /* [Hidden] */
@@ -192,6 +194,7 @@ fullfont1=str(fontname1,":style=",fontstyle1);
 fullfont2=str(fontname2_final,":style=",fontstyle2_final);
 fullfont3=str(fontname3_final,":style=",fontstyle3_final);
 fullfont_hidden=str(fontname_hiddentext_final,":style=",fontstyle1);
+emoji_font_full=str(emoji_font,":style=",emoji_font_style);
 halignvalue = textalign;
 
 distance_12=(realtextsize1/2+realtextsize2/2)*distance;
@@ -708,7 +711,7 @@ module do_special_char(typestr,special_emoji)
     {
         echo ("FONT!", len(special_emoji), special_emoji);
         scale(.6)
-        text(special_emoji,size=specialcharsize,font=emoji_font,halign="center",valign="center");
+        text(special_emoji,size=specialcharsize,font=emoji_font_full,halign="center",valign="center");
     }
     else
     if (type(typestr) == "int")
@@ -722,7 +725,7 @@ module do_special_char(typestr,special_emoji)
         if (len(typestr)<3)
         {
             scale(.6)
-                text(typestr,size=specialcharsize,font=emoji_font,halign="center",valign="center");
+                text(typestr,size=specialcharsize,font=emoji_font_full,halign="center",valign="center");
         }
         else
         {
