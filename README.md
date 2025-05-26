@@ -8,6 +8,8 @@ Open `3dnameplate.scad` in OpenSCAD and use the Customizer pane to tweak the tex
 
 Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**, and set the `emoji_font` parameter to that family name if OpenSCAD does not pick it automatically. You can also specify `emoji_font_style` (e.g. `Bold`) if your chosen emoji font provides different styles. After installing a new font, restart OpenSCAD so it becomes available in the Customizer.
 
+Use the optional `special_character_y_offset` parameter to raise or lower the left and right special icons if they need slight vertical adjustment.
+
 ## OpenSCAD version and `textmetrics`
 
 This script uses the `textmetrics` function, which is available in recent OpenSCAD snapshots. Install a version that includes it and enable the feature under **Edit → Preferences → Features**.

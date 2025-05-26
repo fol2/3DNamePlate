@@ -46,7 +46,10 @@ special_character_right="";//[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen
 special_emoji_right=""; 
 
 // select distance of the special char from the text (in percent of the special char size)
-distance_special_char = 0.5; 
+distance_special_char = 0.5;
+
+// Additional vertical offset for the left and right special characters in mm
+special_character_y_offset = 0;
 
 //Set upper text size (textstring1) in mm
 textsize1=16; 
@@ -225,9 +228,12 @@ specialcharsize = ( (textstring1 != "" ? textsize1:0) +
 echo("specialcharsize",specialcharsize);
 distancespecialchar = specialcharsize*distance_special_char;
 
-specialchar_y=(  (textstring1 != "" && textstring2 != "" &&  textstring3 == "" ) ? distance_line_1_to_2/2 :
+specialchar_y_base = (  (textstring1 != "" && textstring2 != "" &&  textstring3 == "" ) ? distance_line_1_to_2/2 :
                  (textstring1 == "" && textstring2 != "" &&  textstring3 != "" ) ? distance_line_2_to_3/2 :
                  (textstring1 != "" && textstring3 != "" ? (distance_line_1_to_2+distance_line_2_to_3)/2 :0) );
+
+// Apply user-defined vertical offset to the special characters
+specialchar_y = specialchar_y_base + special_character_y_offset;
 
 cutcube_x_nospecialchar=max((len(textstring1)+1)*realtextsize1,(len(textstring2)+1)*realtextsize2,(len(textstring3)+1)*realtextsize3); 
 cutcube_x=cutcube_x_nospecialchar+specialcharsize*((special_character_left=="5Star"||special_character_right=="5Star")?5:1)+distancespecialchar; 
