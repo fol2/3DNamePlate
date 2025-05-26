@@ -2,13 +2,20 @@
 
 // preview[view:south west, tilt:side]
 
-// ---- 新增的全局参数 ----
-line_y_factor = 0.35; // 线条在文本垂直高度的相对位置 (0=底, 0.5=中, 1=顶) - 请根据效果调整
-line_visual_thickness_2d = 1; // 交叉线条在挤出前的2D厚度，一般设为1mm即可
-line_x_offset_factor = 0.01;
-line_width_scale_factor = 1.01;
-// ---- 结束新增的全局参数 ----
+//-----------------
+/* [Bottom Line Settings] */ 
 
+// 线条在文本垂直高度的相对位置 (-1=底, 0=中, 1=顶) - 请根据效果调整
+line_y_factor = 0.35;  //[-1:0.01:1]
+// 交叉线条在挤出前的2D厚度
+line_visual_thickness_2d = 1;  //[0.1:0.1:10]
+// 线条在X轴方向的偏移量，0.01表示偏移1%的文本宽度
+line_x_offset_factor = 0.01;  //[-1:0.01:1]
+// 线条宽度缩放因子，1.01表示增加1%的宽度
+line_width_scale_factor = 1.01;  //[0.1:0.01:10]
+
+//-----------------
+/* [Main Parameters] */ 
 
 //Number of faces to round the sweep. TIP: Use "2" if you want to have a quick preview here in the customizer. Set to at least "10" once you generate a model for printing. 
 faces_segment = 20; //[1:20]
