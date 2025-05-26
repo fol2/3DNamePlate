@@ -1111,17 +1111,19 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 
         // --- 第二部分：凸起的字母 (以及与之交叉的线条) ---
         // 整体向上平移 baseheight，然后挤出 letter_caps_thickness 厚度
+        // 整体向上平移 baseheight
         translate([0,0,baseheight]) {
+            // 1. 生成并挤出主要的文本字符 (使用 text_color)
             color(rgb255(text_color))
             linear_extrude(height=letter_caps_thickness, convexity = 10) {
-                // 1. 生成主要的文本字符 (底部已平整)
                 flat_bottom_text_shape(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
+            }
 
-                // 2. 如果 BaseType 是 "Bottom_Line"，则添加与之交叉的线条
-                if (BaseType == "Bottom_Line") {
-                    // 调用新模块来生成2D线条，它将和文本一起被挤出
-                    // 注意这里的参数：textsize1等是输入给BaseTextCaps的，
-                    // CreateTextIntersectingLine内部会处理realtextsize的获取 (通过全局变量)
+            // 2. 如果 BaseType 是 "Bottom_Line"，则生成并挤出交叉线条 (使用 base_color)
+            if (BaseType == "Bottom_Line") {
+                color(rgb255(base_color)) // <--- 为线条设置 base_color
+                linear_extrude(height=letter_caps_thickness, convexity = 10) {
+                    // 调用新模块来生成2D线条
                     CreateTextIntersectingLine(textstr1, textstr2, textstr3, 
                                                textsize1, textsize2, textsize3, 
                                                line_y_factor, line_visual_thickness_2d);
