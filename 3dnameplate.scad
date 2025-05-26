@@ -72,6 +72,9 @@ textsize3=16;
 //Distance between the two lines in font height
 distance=1.2;
 
+//Scale factor for spacing between letters (1 = default spacing)
+letter_spacing_scale=1; //[0.5:0.1:2]
+
 //set base increase to make letters meet, good start is 'textsize/10'
 base_radius_add=3.5;
 
@@ -255,14 +258,14 @@ cutcube_x_nospecialchar=max((len(textstring1)+1)*realtextsize1,(len(textstring2)
 cutcube_x=cutcube_x_nospecialchar+specialcharsize*((special_character_left=="5Star"||special_character_right=="5Star")?5:1)+distancespecialchar; 
 
 //calc width of text
-size1=textmetrics(textstring1,size=textsize1,font=fullfont1,halign=halignvalue,valign="center");
+size1=textmetrics(textstring1,size=textsize1,font=fullfont1,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
 //ECHO: { position = [-74.0898, -8.51968]; size = [76.6539, 17.0394]; ascent = 16.6298; descent = -0.4096; offset = [-75.7998, -8.11008]; advance = [75.7998, 0]; 
 xsize1=size1.size.x;
 xpos1=size1.position.x;
-size2=textmetrics(textstring2,size=textsize2,font=fullfont2,halign=halignvalue,valign="center");
+size2=textmetrics(textstring2,size=textsize2,font=fullfont2,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
 xsize2=size2.size.x;
 xpos2=size2.position.x;
-size3=textmetrics(textstring3,size=textsize3,font=fullfont3,halign=halignvalue,valign="center"); 
+size3=textmetrics(textstring3,size=textsize3,font=fullfont3,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
 xsize3=size3.size.x;
 xpos3=size3.position.x;
 textminx=min(xpos1,xpos2,xpos3);
@@ -413,12 +416,12 @@ module writetext(textstr1, textstr2, textstr3, sizeit1, sizeit2, sizeit3, add_a_
         translate([shifttext,0,0])
         {
             translate([0,distance_line_2_to_3+distance_line_1_to_2,0])
-                text(textstr1,size=sizeit1,font=fullfont1,halign=halignvalue,valign="center");
+                text(textstr1,size=sizeit1,font=fullfont1,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
             
             translate([0,distance_line_2_to_3,0])
-                text(textstr2,size=sizeit2,font=fullfont2,halign=halignvalue,valign="center");
+                text(textstr2,size=sizeit2,font=fullfont2,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
             
-            text(textstr3,size=sizeit3,font=fullfont3,halign=halignvalue,valign="center"); 
+            text(textstr3,size=sizeit3,font=fullfont3,halign=halignvalue,valign="center",spacing=letter_spacing_scale);
         }
         
         translate([ 0,specialchar_y,0])
@@ -493,7 +496,7 @@ function _intersect_line_calc_baseline_y(Text_Y_Center, Text_String, Font_Size, 
     (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 : // 若无效则返回极大值
         let(
             safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
-            metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+            metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name, spacing=letter_spacing_scale)
         )
         (metrics.descent == undef) ? Text_Y_Center - Font_Size*0.2 : // 近似值
         Text_Y_Center + metrics.descent; // metrics.descent 通常是负数
@@ -503,7 +506,7 @@ function _intersect_line_calc_top_y(Text_Y_Center, Text_String, Font_Size, Font_
     (Text_String == "" || Text_String == undef || Font_Size <= 0) ? -100000 : // 若无效则返回极小值
         let(
             safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
-            metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+            metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name, spacing=letter_spacing_scale)
         )
         (metrics.ascent == undef) ? Text_Y_Center + Font_Size*0.8 : // 近似值
         Text_Y_Center + metrics.ascent;
@@ -615,7 +618,7 @@ module flat_bottom_hull_text(textstr1_param, textstr2_param, textstr3_param, siz
             let(
                 // Ensure Font_Name_Full is valid, provide a common fallback for textmetrics
                 safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
-                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name, spacing=letter_spacing_scale)
             )
             // If metrics.descent or .ascent is undef (e.g., font not found, or text empty for metrics),
             // fallback to a rough estimate of bottom.
@@ -714,7 +717,7 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
         (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 :
             let(
                 safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
-                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name, spacing=letter_spacing_scale)
             )
             (metrics.descent == undef || metrics.ascent == undef) ? Text_Y_Center - Font_Size/2 : 
             Text_Y_Center - (metrics.ascent + metrics.descent) / 2;
@@ -825,7 +828,7 @@ module flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
         (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 :
             let(
                 safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
-                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name)
+                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name, spacing=letter_spacing_scale)
             )
             (metrics.descent == undef || metrics.ascent == undef) ? Text_Y_Center - Font_Size/2 : 
             Text_Y_Center - (metrics.ascent + metrics.descent) / 2;
@@ -1070,7 +1073,7 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
                         translate([0,0,-.01])
                             linear_extrude(height=min(baseheight/2,1), twist=0, slices=1, $fn=32, convexity = 5)       
                                 scale([-1,1,1])
-                                    text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center");
+                                    text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center",spacing=letter_spacing_scale);
                 }
     }
 }
@@ -1668,7 +1671,7 @@ module bezier_polygon(points) {
 }
 
 //------ check textmetrics availability at the end for user feedback
-test=textmetrics("test",size=8);
+test=textmetrics("test",size=8,spacing=letter_spacing_scale);
 if(test.size.x>0)
 {
     echo("All good. Textmetrics option is activated.");
