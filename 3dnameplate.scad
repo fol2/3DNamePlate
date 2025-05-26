@@ -63,6 +63,12 @@ emoji_text_style="<same as emoji_font_style>"; //["<same as emoji_font_style>","
 // Scale factor for emoji size when used inside text strings
 emoji_text_size_scale = 1; //[0.5:0.05:2]
 
+// Horizontal offset for emojis inside text strings in mm
+emoji_text_x_offset = 0; //[-5:0.1:5]
+
+// Vertical offset for emojis inside text strings in mm
+emoji_text_y_offset = 0; //[-5:0.1:5]
+
 //... and select your special characters, like a heart, etc.
 special_character_left=""; //[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen,Cogwheel,🎄,🎅🏻,🌨️,❄,🧒,🤪,🧁,🍰,🎁,🎀,🎲,🎂,🎈,🎺,🥑,🎉,🎊,📧,〽,️🧿,🌶,🔋,😂,❤,️😍,🤣,😊,🥺,🙏,💕,😭,😘,👍,😅,👏,🐵,🥰,💀,✌,️🌴,🐢,🐐,🍄,⚽,🍻,👑,📸,😬,👀,🚨,🏡,🕊,️🏆,😻,🌟,🧿,🍀,🎨,🍜,👾,🚀,💉,Clock,†,Key,Pin,Gift,Thumbs_Up,Thumbs_Down,Mail,Cake,Person,Cloud,Book,Speaking_Bubble,Puzzle_Piece,Shopping_Cart,Cloud_download,Boarding_Pass,Trashcan,Circular_Arrows,8364:Euro,8592:Left arrow,8594:Right arrow,🎵,9835:Double note,8801:Identical,9658:Thick right arrow,9668:Thick left arrow,9787:Full smiley,9786:Unfilled smiley,9788:Sun,9675:Circle,9679:Dot,9792:Female sign,9794:Male sign,9674:Diamond unfilled,9830:Diamond,9824:Spades,9827:Club,35:#,33:!,63:?,36:$,37:%,38:&,42:*,43:+,64:@,8593:Up arrow,8595:Down arrow,42779:Small up arrow,42780:Small down arrow,8734:Infinity,167:Paragraph,169:Copyright,174:Registered Trademark,189:One Half,191:Upside Down ?,216:Empty Set,215:Small x,404:Ribbon,664:Circle with dot,673:Scythe,860:Abstract ear,936:Psy,955:Lambda,960:Pi,985:Lolly,1146:Circle with poles,1161:Commas fly out,8286:Four dots,8962:Abstract house]
 
@@ -434,9 +440,12 @@ module draw_text_line_with_emoji(str, size, normal_font, emoji_font)
                      m.advance.x * letter_spacing_scale]);
 
         translate([x_off, 0, 0])
-            text(ch, size=ch_size, font=use_font,
-                 halign="left", valign="center",
-                 spacing=letter_spacing_scale);
+            translate(is_emoji_char(ch)
+                      ? [emoji_text_x_offset, emoji_text_y_offset, 0]
+                      : [0, 0, 0])
+                text(ch, size=ch_size, font=use_font,
+                     halign="left", valign="center",
+                     spacing=letter_spacing_scale);
     }
 }
 
