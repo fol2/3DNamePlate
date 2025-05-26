@@ -3,10 +3,10 @@
 // preview[view:south west, tilt:side]
 
 // ---- 新增的全局参数 ----
-line_y_factor = 0.350; // 线条在文本垂直高度的相对位置 (0=底, 0.5=中, 1=顶) - 请根据效果调整
+line_y_factor = 0.35; // 线条在文本垂直高度的相对位置 (0=底, 0.5=中, 1=顶) - 请根据效果调整
 line_visual_thickness_2d = 1; // 交叉线条在挤出前的2D厚度，一般设为1mm即可
-line_x_offset_factor = 0.001;
-line_width_scale_factor = 1.001;
+line_x_offset_factor = 0.01;
+line_width_scale_factor = 1.01;
 // ---- 结束新增的全局参数 ----
 
 
@@ -1113,20 +1113,32 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
         // 整体向上平移 baseheight，然后挤出 letter_caps_thickness 厚度
         // 整体向上平移 baseheight
         translate([0,0,baseheight]) {
-            // 1. 生成并挤出主要的文本字符 (使用 text_color)
-            color(rgb255(text_color))
-            linear_extrude(height=letter_caps_thickness, convexity = 10) {
-                flat_bottom_text_shape(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
-            }
-
-            // 2. 如果 BaseType 是 "Bottom_Line"，则生成并挤出交叉线条 (使用 base_color)
             if (BaseType == "Bottom_Line") {
-                color(rgb255(base_color)) // <--- 为线条设置 base_color
+                // 情况1：Bottom_Line 类型
+                // a) 渲染文本，但减去线条的区域 (使用 text_color)
+                color(rgb255(text_color))
                 linear_extrude(height=letter_caps_thickness, convexity = 10) {
-                    // 调用新模块来生成2D线条
+                    difference() {
+                        flat_bottom_text_shape(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
+                        CreateTextIntersectingLine(textstr1, textstr2, textstr3, 
+                                                   textsize1, textsize2, textsize3, 
+                                                   line_y_factor, line_visual_thickness_2d);
+                    }
+                }
+
+                // b) 渲染线条本身 (使用 base_color)，它将填充上面difference操作留下的空隙
+                color(rgb255(base_color))
+                linear_extrude(height=letter_caps_thickness, convexity = 10) {
                     CreateTextIntersectingLine(textstr1, textstr2, textstr3, 
                                                textsize1, textsize2, textsize3, 
                                                line_y_factor, line_visual_thickness_2d);
+                }
+            } else {
+                // 情况2：其他 BaseType (保持原有行为)
+                // 生成并挤出主要的文本字符 (使用 text_color)
+                color(rgb255(text_color))
+                linear_extrude(height=letter_caps_thickness, convexity = 10) {
+                    flat_bottom_text_shape(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
                 }
             }
         }
