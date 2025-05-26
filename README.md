@@ -4,7 +4,7 @@ This repository contains an OpenSCAD script for generating customizable 3D name 
 
 ## Editing `3dnameplate.scad`
 
-Open `3dnameplate.scad` in OpenSCAD and use the Customizer pane to tweak the text, layout, and other options. The Customizer exposes settings for the three text lines, base style, sweep angle and more. Font choices can be adjusted using the `fontname*` and `fontstyle*` parameters. In the Customizer these appear under the “Hidden” section. Enter any installed font family and style to render the text. The script also provides `text_color` and `base_color` parameters so the preview can show different colors for the text and base.
+Open `3dnameplate.scad` in OpenSCAD and use the Customizer pane to tweak the text, layout, and other options. The Customizer exposes settings for the three text lines, base style, sweep angle and more. Font choices can be adjusted using the `fontname*` and `fontstyle*` parameters. In the Customizer these appear under the “Hidden” section. Enter any installed font family and style to render the text. The script also provides `text_color` and `base_color` parameters so the preview can show different colors for the text and base. Specify these colors using standard 0‑255 RGB values.
 
 Emoji and special characters are supported. For the best results install a font that includes emoji characters, such as **Noto Emoji**, and set the `emoji_font` parameter to that family name if OpenSCAD does not pick it automatically. You can also specify `emoji_font_style` (e.g. `Bold`) if your chosen emoji font provides different styles. After installing a new font, restart OpenSCAD so it becomes available in the Customizer.
 
