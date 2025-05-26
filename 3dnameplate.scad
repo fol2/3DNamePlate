@@ -136,6 +136,9 @@ border_side=5;
 //rounding for the rounded rectangle (additional to the baseheight!)
 Rounded_rectangle_radius=.4;
 
+//global fillet radius applied to the finished plate (0 disables)
+global_corner_radius = 0; //[0:0.1:5]
+
 //-----------------
 /* [Bottom Line Settings] */ 
 
@@ -922,9 +925,21 @@ module rotate_extrude2(angle=360, convexity=2, xsize=100,yzsize=100) {
 //------------------
 module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction="up")
 {
-    
     rotate([0,-90,0])
     {
+        if (global_corner_radius > 0) {
+            minkowski() {
+                _rise_text_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction);
+                cylinder(r = global_corner_radius, h = 0.1, center = true, $fn = 16);
+            }
+        } else {
+            _rise_text_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction);
+        }
+    }
+}
+
+module _rise_text_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction)
+{
 
         color(rgb255(text_color))
         difference()
@@ -1065,13 +1080,24 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
                                     text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center",spacing=letter_spacing_scale);
                 }
     }
-}
 
 //------------------
 //Simple base plus raised text for printing letter caps with a small platform
 // ... (确保上面的辅助函数和 CreateTextIntersectingLine 模块已定义) ...
 
 module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3)
+{
+    if (global_corner_radius > 0) {
+        minkowski() {
+            _base_text_caps_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3);
+            cylinder(r = global_corner_radius, h = 0.1, center = true, $fn = 16);
+        }
+    } else {
+        _base_text_caps_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3);
+    }
+}
+
+module _base_text_caps_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3)
 {
     union()
     {
