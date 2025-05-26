@@ -5,7 +5,8 @@
 // ---- 新增的全局参数 ----
 line_y_factor = 0.350; // 线条在文本垂直高度的相对位置 (0=底, 0.5=中, 1=顶) - 请根据效果调整
 line_visual_thickness_2d = 1; // 交叉线条在挤出前的2D厚度，一般设为1mm即可
-line_x_offset_factor = 0.001; 
+line_x_offset_factor = 0.001;
+line_width_scale_factor = 1.001;
 // ---- 结束新增的全局参数 ----
 
 
@@ -559,7 +560,7 @@ module CreateTextIntersectingLine(textstr1_p, textstr2_p, textstr3_p, sizeit1_p,
     // 线条中心点在“平整后文本”坐标系中的Y坐标 (0点在平整后文本的底部)
     line_center_y_in_flat_shape_coords = effective_text_height * _line_y_factor_param;
 
-    _line_actual_width = textwidth; // 使用全局的 textwidth 作为线条宽度
+    _line_actual_width = textwidth * line_width_scale_factor; // 使用缩放后的 textwidth
 
     // 生成2D线条，它将被外部挤出
     // 使用 shifttext 进行水平对齐
