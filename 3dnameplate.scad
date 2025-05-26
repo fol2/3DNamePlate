@@ -61,7 +61,7 @@ textsize3=16;
 distance=1.2;
 
 //set base increase to make letters meet, good start is 'textsize/10'
-base_radius_add=4;
+base_radius_add=3.5;
 
 //set base height in mm
 baseheight=1;
