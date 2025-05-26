@@ -13,6 +13,8 @@ line_visual_thickness_2d = 1;  //[0.1:0.1:10]
 line_x_offset_factor = 0.01;  //[-1:0.01:1]
 // 线条宽度缩放因子，1.01表示增加1%的宽度
 line_width_scale_factor = 1.01;  //[0.1:0.01:10]
+// Bottom epsilon used to slightly shave the text's bottom
+bottom_epsilon = -2.0;
 
 //-----------------
 /* [Main Parameters] */ 
@@ -597,7 +599,7 @@ module flat_bottom_hull_text(textstr1_param, textstr2_param, textstr3_param, siz
     // Set to 0 to have non-descending letters sit exactly on the base's bottom surface
     // (but descender hulls might still visually protrude slightly, similar to v4 results).
     // Typical values might be 0.1mm to 0.5mm depending on desired effect and model scale.
-    cut_shave_epsilon = -2; // <<<< YOU CAN TUNE THIS VALUE (e.g., 0.1, 0.3, 0.05)
+    cut_shave_epsilon = bottom_epsilon; // Global bottom epsilon
     // ---
 
     // Helper to calculate baseline Y for text elements using textmetrics
@@ -697,7 +699,7 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
     // - A small positive value will make them slightly embedded/shaved at the bottom.
     // - A small negative value might be needed if textmetrics seems to place baseline slightly too high visually.
     // Tune this for the best visual fit of raised letters on the base.
-    raised_text_shave_epsilon = -2.0; // <<<< TUNE THIS for raised letters (e.g., 0.0, 0.1, -0.05)
+    raised_text_shave_epsilon = bottom_epsilon; // Global bottom epsilon
     // ---
 
     // Helper to calculate baseline Y for text elements using textmetrics
@@ -776,7 +778,7 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
 
 // NEW module (v1) to flatten the ACTUAL bottom of any 2D child object
 // It finds the minimum Y of the child's bounding box and cuts at/slightly above that.
-module flatten_bottom_of_child(shave_epsilon = 0.0) {
+module flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
     // Important: This module expects its child to be a 2D shape already positioned
     // correctly in the XY plane (e.g., after writetext, offset, hull, etc.).
 
@@ -1111,7 +1113,7 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             }
         } else if(BaseType=="Round") {
             linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
-                flatten_bottom_of_child(shave_epsilon = -1.5) { // You can tune this 0.2
+                flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
                     offset(r = base_radius_add) 
                     {
                         writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
