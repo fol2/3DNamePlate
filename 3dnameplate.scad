@@ -136,6 +136,9 @@ border_side=5;
 //rounding for the rounded rectangle (additional to the baseheight!)
 Rounded_rectangle_radius=.4;
 
+//global fillet radius applied to the finished plate (0 disables)
+global_corner_radius = 0; //[0:0.1:5]
+
 //-----------------
 /* [Bottom Line Settings] */ 
 
@@ -925,10 +928,10 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
     
     rotate([0,-90,0])
     {
-
-        color(rgb255(text_color))
-        difference()
-        {
+        module _rise_text_core() {
+            color(rgb255(text_color))
+            difference()
+            {
             union()
             {
                 //text as rotation for a certain angle
@@ -1073,8 +1076,18 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
 
 module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3)
 {
-    union()
-    {
+    if (global_corner_radius > 0) {
+        minkowski() {
+            _base_text_caps_core();
+            cylinder(r = global_corner_radius, h = 0.1, center = true, $fn = 16);
+        }
+    } else {
+        _base_text_caps_core();
+    }
+}
+
+module _base_text_caps_core() {
+    union() {
         // --- 第一部分：实际的“底座”（通过 baseheight 挤出） ---
         color(rgb255(base_color))
         difference() {
@@ -1224,6 +1237,15 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
                     flat_bottom_text_shape(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
                 }
             }
+        }
+    }
+        if (global_corner_radius > 0) {
+            minkowski() {
+                _rise_text_core();
+                cylinder(r = global_corner_radius, h = 0.1, center = true, $fn = 16);
+            }
+        } else {
+            _rise_text_core();
         }
     }
 }
