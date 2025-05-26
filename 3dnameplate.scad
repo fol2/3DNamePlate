@@ -3,6 +3,137 @@
 // preview[view:south west, tilt:side]
 
 //-----------------
+/* [Text Strings] */ 
+
+//Set the upper text to render
+textstring1="KEEP CALM";
+//Set the lower text to render
+textstring2="CARRY ON";
+//Set a third text line to render (typically not used. If you use this line, the other two lines will move up to make room for the lowest line)
+textstring3="";
+
+//-----------------
+/* [Text Settings] */ 
+
+// Select fonts and styles for the text lines
+fontname1="Noto Sans CJK HK";        //["Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
+// Optional overrides to specify any installed font family directly. When non-empty,
+fontname1_override="";
+// Font style for the upper text
+fontstyle1="Regular";            //["Regular","Bold","Italic"]
+//Set upper text size (textstring1) in mm
+textsize1=16; //[6:0.5:100]
+
+// Select fonts and styles for the text lines
+fontname2="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
+// Optional overrides to specify any installed font family directly. When non-empty,
+fontname2_override="";
+// Font style for the lower text
+fontstyle2="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
+//Set lower text size (textstring2)in mm
+textsize2=16; //[6:0.5:100]
+
+// Select fonts and styles for the text lines
+fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
+// Optional overrides to specify any installed font family directly. When non-empty,
+fontname3_override="";
+// Font style for the lowest text
+fontstyle3="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
+//Set lowest text size (textstring3)in mm - if really 3 lines are used
+textsize3=16; //[6:0.5:100]
+
+// Alignment of the text (center, left, right)
+textalign="left"; // [center:left:right]
+
+//Distance between the two lines in font height
+distance=1.2; //[0.5:0.05:2]
+
+//Scale factor for spacing between letters (1 = default spacing)
+letter_spacing_scale=1; //[0.5:0.05:2]
+
+//-----------------
+/* [Special Characters (Emojis)] */ 
+
+// Style for emoji font (if the selected font provides styles)
+emoji_font_style="Regular"; //["Regular","Bold","Italic"]
+
+//... and select your special characters, like a heart, etc.
+special_character_left=""; //[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen,Cogwheel,🎄,🎅🏻,🌨️,❄,🧒,🤪,🧁,🍰,🎁,🎀,🎲,🎂,🎈,🎺,🥑,🎉,🎊,📧,〽,️🧿,🌶,🔋,😂,❤,️😍,🤣,😊,🥺,🙏,💕,😭,😘,👍,😅,👏,🐵,🥰,💀,✌,️🌴,🐢,🐐,🍄,⚽,🍻,👑,📸,😬,👀,🚨,🏡,🕊,️🏆,😻,🌟,🧿,🍀,🎨,🍜,👾,🚀,💉,Clock,†,Key,Pin,Gift,Thumbs_Up,Thumbs_Down,Mail,Cake,Person,Cloud,Book,Speaking_Bubble,Puzzle_Piece,Shopping_Cart,Cloud_download,Boarding_Pass,Trashcan,Circular_Arrows,8364:Euro,8592:Left arrow,8594:Right arrow,🎵,9835:Double note,8801:Identical,9658:Thick right arrow,9668:Thick left arrow,9787:Full smiley,9786:Unfilled smiley,9788:Sun,9675:Circle,9679:Dot,9792:Female sign,9794:Male sign,9674:Diamond unfilled,9830:Diamond,9824:Spades,9827:Club,35:#,33:!,63:?,36:$,37:%,38:&,42:*,43:+,64:@,8593:Up arrow,8595:Down arrow,42779:Small up arrow,42780:Small down arrow,8734:Infinity,167:Paragraph,169:Copyright,174:Registered Trademark,189:One Half,191:Upside Down ?,216:Empty Set,215:Small x,404:Ribbon,664:Circle with dot,673:Scythe,860:Abstract ear,936:Psy,955:Lambda,960:Pi,985:Lolly,1146:Circle with poles,1161:Commas fly out,8286:Four dots,8962:Abstract house]
+
+//...paste an emoji in the text field below (this field overrides the one above!): 🥳🧁🍰🎁
+special_emoji_left=""; 
+
+flip_right_character=false;
+
+special_character_right="";//[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen,Cogwheel,🎄,🎅🏻,🌨️,❄,🧒,🤪,🧁,🍰,🎁,🎀,🎲,🎂,🎈,🎺,🥑,🎉,🎊,📧,〽,️🧿,🌶,🔋,😂,❤,️😍,🤣,😊,🥺,🙏,💕,😭,😘,👍,😅,👏,🐵,🥰,💀,✌,️🌴,🐢,🐐,🍄,⚽,🍻,👑,📸,😬,👀,🚨,🏡,🕊,️🏆,😻,🌟,🧿,🍀,🎨,🍜,👾,🚀,💉,Clock,†,Key,Pin,Gift,Thumbs_Up,Thumbs_Down,Mail,Cake,Person,Cloud,Book,Speaking_Bubble,Puzzle_Piece,Shopping_Cart,Cloud_download,Boarding_Pass,Trashcan,Circular_Arrows,8364:Euro,8592:Left arrow,8594:Right arrow,🎵,9835:Double note,8801:Identical,9658:Thick right arrow,9668:Thick left arrow,9787:Full smiley,9786:Unfilled smiley,9788:Sun,9675:Circle,9679:Dot,9792:Female sign,9794:Male sign,9674:Diamond unfilled,9830:Diamond,9824:Spades,9827:Club,35:#,33:!,63:?,36:$,37:%,38:&,42:*,43:+,64:@,8593:Up arrow,8595:Down arrow,42779:Small up arrow,42780:Small down arrow,8734:Infinity,167:Paragraph,169:Copyright,174:Registered Trademark,189:One Half,191:Upside Down ?,216:Empty Set,215:Small x,404:Ribbon,664:Circle with dot,673:Scythe,860:Abstract ear,936:Psy,955:Lambda,960:Pi,985:Lolly,1146:Circle with poles,1161:Commas fly out,8286:Four dots,8962:Abstract house]
+
+//...paste an emoji in the text field below (this field overrides the one above!): 🥳🧁🍰🎁
+special_emoji_right=""; 
+
+// select distance of the special char from the text (in percent of the special char size)
+distance_special_char = 0.5;
+
+// Additional vertical offset for the left and right special characters in mm
+special_character_y_offset = 0.1;
+
+// Font used for emoji characters in special icons
+emoji_font="Noto Emoji";
+
+//-----------------
+/* [Color Settings] */ 
+
+//Primary colors for the generated model (RGB 0-255)
+text_color = [255, 255, 255]; //[color]
+base_color = [204, 204, 204]; //[color]
+
+//Utility: convert 0-255 RGB values to the 0-1 range expected by color()
+function rgb255(c) = [for(i=[0:len(c)-1]) (i < 3 ? c[i]/255 : c[i])];
+
+//-----------------
+/* [Hidden Text] */ 
+//Hidden text under the base (in case you need it), settings are way below.
+HiddenText="";
+//Select font for hidden text
+fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
+//Hidden text size
+HiddenTextSize=4;
+//Hidden text style
+HiddenTextStyle="Regular"; //["Regular","Bold","Italic"]
+//Hidden text x-position
+HiddenTextX=0; //[-100:100]
+//Hidden text y-position
+HiddenTextY=0; //[-100:100]
+//Hidden text depth
+HiddenTextDepth=1; //[0:0.1:10]
+
+//-----------------
+/* [Base Settings] */ 
+
+//Select part to generate (full, letter caps only or letter caps with a base)
+part_to_generate="sweeping_text";//[sweeping_text,text_caps,base_text_caps]
+
+//Base type, select "Round" if you want a rounded base following the texts contours. Select "Rounded_rectangle" and increase baseheight and Rounded_rectangle_radius (take care that: baseheight > 2*Rounded_rectangle_radius)
+BaseType="Round"; //[Round,Minimal_straight,Pedestal,Chamfered_rectangle,Rectangle,Rounded_rectangle,Bottom_Line]
+
+//In case you selected "caps" above, what should be the thickness of the caps?
+letter_caps_thickness=1;
+
+//set base height in mm
+baseheight=1;
+
+//set base increase to make letters meet, good start is 'textsize/10'
+base_radius_add=3.5;
+
+//For the square basetype, add Border in mm to add "above" of the letters and "below" the letters
+border_topdown=3;
+
+//Border to add on left and right side of the letters
+border_side=5;
+
+//rounding for the rounded rectangle (additional to the baseheight!)
+Rounded_rectangle_radius=.4;
+
+//-----------------
 /* [Bottom Line Settings] */ 
 
 // 线条在文本垂直高度的相对位置 (-1=底, 0=中, 1=顶) - 请根据效果调整
@@ -17,75 +148,7 @@ line_width_scale_factor = 1.01;  //[0.1:0.01:10]
 bottom_epsilon = -2.0; //[-10:0.1:10]
 
 //-----------------
-/* [Main Parameters] */ 
-
-//Set the upper text to render
-textstring1="KEEP CALM";
-
-//Set the lower text to render
-textstring2="CARRY ON";
-
-//Set a third text line to render (typically not used. If you use this line, the other two lines will move up to make room for the lowest line)
-textstring3="";
-
-//Hidden text under the base (in case you need it), settings are way below.
-HiddenText="";
-
-textalign="left"; // [center:left:right]
-
-//Primary colors for the generated model (RGB 0-255)
-text_color = [255, 255, 255]; //[color]
-base_color = [204, 204, 204]; //[color]
-
-//Utility: convert 0-255 RGB values to the 0-1 range expected by color()
-function rgb255(c) = [for(i=[0:len(c)-1]) (i < 3 ? c[i]/255 : c[i])];
-
-//... and select your special characters, like a heart, etc.
-special_character_left=""; //[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen,Cogwheel,🎄,🎅🏻,🌨️,❄,🧒,🤪,🧁,🍰,🎁,🎀,🎲,🎂,🎈,🎺,🥑,🎉,🎊,📧,〽,️🧿,🌶,🔋,😂,❤,️😍,🤣,😊,🥺,🙏,💕,😭,😘,👍,😅,👏,🐵,🥰,💀,✌,️🌴,🐢,🐐,🍄,⚽,🍻,👑,📸,😬,👀,🚨,🏡,🕊,️🏆,😻,🌟,🧿,🍀,🎨,🍜,👾,🚀,💉,Clock,†,Key,Pin,Gift,Thumbs_Up,Thumbs_Down,Mail,Cake,Person,Cloud,Book,Speaking_Bubble,Puzzle_Piece,Shopping_Cart,Cloud_download,Boarding_Pass,Trashcan,Circular_Arrows,8364:Euro,8592:Left arrow,8594:Right arrow,🎵,9835:Double note,8801:Identical,9658:Thick right arrow,9668:Thick left arrow,9787:Full smiley,9786:Unfilled smiley,9788:Sun,9675:Circle,9679:Dot,9792:Female sign,9794:Male sign,9674:Diamond unfilled,9830:Diamond,9824:Spades,9827:Club,35:#,33:!,63:?,36:$,37:%,38:&,42:*,43:+,64:@,8593:Up arrow,8595:Down arrow,42779:Small up arrow,42780:Small down arrow,8734:Infinity,167:Paragraph,169:Copyright,174:Registered Trademark,189:One Half,191:Upside Down ?,216:Empty Set,215:Small x,404:Ribbon,664:Circle with dot,673:Scythe,860:Abstract ear,936:Psy,955:Lambda,960:Pi,985:Lolly,1146:Circle with poles,1161:Commas fly out,8286:Four dots,8962:Abstract house]
-//...paste an emoji in the text field below (this field overrides the one above!): 🥳🧁🍰🎁
-special_emoji_left=""; 
-
-flip_right_character=false;
-
-special_character_right="";//[9829:Heart,Star,5Star,Instagram,Youtube,Corona,Pen,Cogwheel,🎄,🎅🏻,🌨️,❄,🧒,🤪,🧁,🍰,🎁,🎀,🎲,🎂,🎈,🎺,🥑,🎉,🎊,📧,〽,️🧿,🌶,🔋,😂,❤,️😍,🤣,😊,🥺,🙏,💕,😭,😘,👍,😅,👏,🐵,🥰,💀,✌,️🌴,🐢,🐐,🍄,⚽,🍻,👑,📸,😬,👀,🚨,🏡,🕊,️🏆,😻,🌟,🧿,🍀,🎨,🍜,👾,🚀,💉,Clock,†,Key,Pin,Gift,Thumbs_Up,Thumbs_Down,Mail,Cake,Person,Cloud,Book,Speaking_Bubble,Puzzle_Piece,Shopping_Cart,Cloud_download,Boarding_Pass,Trashcan,Circular_Arrows,8364:Euro,8592:Left arrow,8594:Right arrow,🎵,9835:Double note,8801:Identical,9658:Thick right arrow,9668:Thick left arrow,9787:Full smiley,9786:Unfilled smiley,9788:Sun,9675:Circle,9679:Dot,9792:Female sign,9794:Male sign,9674:Diamond unfilled,9830:Diamond,9824:Spades,9827:Club,35:#,33:!,63:?,36:$,37:%,38:&,42:*,43:+,64:@,8593:Up arrow,8595:Down arrow,42779:Small up arrow,42780:Small down arrow,8734:Infinity,167:Paragraph,169:Copyright,174:Registered Trademark,189:One Half,191:Upside Down ?,216:Empty Set,215:Small x,404:Ribbon,664:Circle with dot,673:Scythe,860:Abstract ear,936:Psy,955:Lambda,960:Pi,985:Lolly,1146:Circle with poles,1161:Commas fly out,8286:Four dots,8962:Abstract house]
-//...paste an emoji in the text field below (this field overrides the one above!): 🥳🧁🍰🎁
-special_emoji_right=""; 
-
-// select distance of the special char from the text (in percent of the special char size)
-distance_special_char = 0.5;
-
-// Additional vertical offset for the left and right special characters in mm
-special_character_y_offset = 0.1;
-
-//Set upper text size (textstring1) in mm
-textsize1=16; 
-
-//Set lower text size (textstring2)in mm
-textsize2=16; 
-
-//Set lowest text size (textstring3)in mm - if really 3 lines are used
-textsize3=16;
-
-/* [Hidden] */
-//Hidden text size
-HiddenTextSize=4;
-HiddenTextStyle="Regular"; //["Regular","Bold","Italic"]
-HiddenTextX=0;
-HiddenTextY=0;
-HiddenTextDepth=1;
-/* [Main Parameters] */
-
-//Distance between the two lines in font height
-distance=1.2;
-
-//Scale factor for spacing between letters (1 = default spacing)
-letter_spacing_scale=1; //[0.5:0.1:2]
-
-//set base increase to make letters meet, good start is 'textsize/10'
-base_radius_add=3.5;
-
-//set base height in mm
-baseheight=1;
+/* [Sweep Settings] */ 
 
 //set angle to sweep 
 cutangle=65;
@@ -99,17 +162,8 @@ faces_segment = 20; //[1:20]
 //Sweep direction
 direction="up"; //["up":text top is highest, "down": text bottom is highest]
 
-//Base type, select "Round" if you want a rounded base following the texts contours. Select "Rounded_rectangle" and increase baseheight and Rounded_rectangle_radius (take care that: baseheight > 2*Rounded_rectangle_radius)
-BaseType="Round"; //[Round,Minimal_straight,Pedestal,Chamfered_rectangle,Rectangle,Rounded_rectangle,Bottom_Line]
-
-//For the square basetype, add Border in mm to add "above" of the letters and "below" the letters
-border_topdown=3;
-
-//Border to add on left and right side of the letters
-border_side=5;
-
-//rounding for the rounded rectangle (additional to the baseheight!)
-Rounded_rectangle_radius=.4;
+//-----------------
+/* [Magnet Settings] */ 
 
 //Select this if you want to add magnets to the base
 magnettype="None"; //[None,Cube10x1,Cylinder8x3,Cylinder5x2c5,Cylinder8x1c7,Cylinder12x2c5]
@@ -126,87 +180,13 @@ wiggle_magnet_depth=.4;
 //In case you want to have the magnet *inside* the print: Increase this magnet_closing_layer to e.g. 0.2mm (one layer of filament). Then print the closing layer and the magnet height, pause the print, put in the magnets, continue the print. If your print bed is of metal, the magnets should stick well to the plate and not to your print head.
 magnet_closing_layer=0;
 
-
 //-----------------
-/* [AdditionalSettings] */ 
-
-
-//Select part to generate (full, letter caps only or letter caps with a base)
-part_to_generate="sweeping_text";//[sweeping_text,text_caps,base_text_caps]
-
-//In case you selected "caps" above, what should be the thickness of the caps?
-letter_caps_thickness=1;
-
-
+/* [Base Swiss Settings] */ 
 
 //You can have several holes in the base in a regular pattern. Use it if you need a hole for a magnet/fixture in a few positions. You activate the holes by setting a non-zero value (e.g. 5mm)
 BaseSwissCheeseHoleD=0;
 BaseSwissCheeseLength=80;
 BaseSwissCheeseWidth=50;
-
-/* [FontOptions] */
-// Select fonts and styles for the text lines
-fontname1="Noto Sans CJK HK";        //["Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
-fontstyle1="Regular";            //["Regular","Bold","Italic"]
-fontname2="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
-fontstyle2="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
-fontname3="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
-fontstyle3="<same as fontstyle1>"; //["<same as fontstyle1>","Regular","Bold","Italic"]
-fontname_hiddentext="<same as fontname1>"; //["<same as fontname1>","Noto Sans CJK HK","Press Start 2P","Liberation Sans","DejaVu Serif","Ami R","Arial Rounded MT Bold","Bauhaus 93","Bell MT","Freestyle Script","Ravie","Vampiro One"]
-
-// Optional overrides to specify any installed font family directly. When non-empty,
-// these values take precedence over the dropdown selections above.
-fontname1_override="";
-fontname2_override="";
-fontname3_override="";
-// Font used for emoji characters in special icons
-emoji_font="Noto Emoji";
-// Style for emoji font (if the selected font provides styles)
-emoji_font_style="Regular"; //["Regular","Bold","Italic"]
-
-
-/* [Hidden] */
-//-------------------------------------------------------------------------------
-
-/*
-Sweeping Name Plate with 2 or 3 lines
-Version ZZ, October 2023
-Written by MC Geisler (mcgenki at gmail dot com)
-
-Another name plate, this time sweeping around.
-
-Have fun!
-
-btw, here is the character map:
-https://www.fontspace.com/google/noto-sans/38303/charmap
-
-I used Bezier to OpenScad for the icons here: 
-https://www.thingiverse.com/thing:2805184
-Thanks gaellafond! 
-https://www.thingiverse.com/gaellafond/about
-
-Big thanks to Lyl3 for his speed improvement on PC (not Thingiverse)
-https://www.thingiverse.com/Lyl3/about
-
-Thanks go out to Sergey Ershov for his multimedia icons at 
-https://www.iconfinder.com/iconsets/multimedia-75
-
-Thanks go out to Oleg Turbaba for his icons at 
-https://www.iconfinder.com/iconsets/iconoteka-stroke
-
-Thanks go out to Instagram for their Glyph 
-https://en.instagram-brand.com/assets/glyph-icon
-
-Thanks to Hamish Trolove (www.techmonkeybusiness.com) for the script to generate holes in a regular pattern.
-
-License: Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
-
-You are free to:
-    Share - copy and redistribute the material in any medium or format
-    Adapt - remix, transform, and build upon the material
-    for non-commercial purposes only.
-*/
-
 
 faces = faces_segment*360/cutangle;
 //echo (faces);
