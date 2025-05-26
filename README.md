@@ -15,6 +15,8 @@ Use the optional `special_character_y_offset` parameter to raise or lower the le
 
 Hidden text can also be engraved on the underside of the plate. Set the text via `HiddenText` and adjust its size with `HiddenTextSize`. The new parameters `HiddenTextStyle`, `HiddenTextX`, `HiddenTextY` and `HiddenTextDepth` control the font style, position offsets and engraving depth of this secret message.
 
+When the base style is set to **Round**, the `round_base_link_thickness` parameter can add slim connectors along each text line before the base is offset. These bars help link separated letters into a single circular plate. Set it to `0` to disable the connectors.
+
 ## OpenSCAD version and `textmetrics`
 
 This script uses the `textmetrics` function, which is available in recent OpenSCAD snapshots. Install a version that includes it and enable the feature under **Edit → Preferences → Features**.
