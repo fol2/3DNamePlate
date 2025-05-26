@@ -64,10 +64,16 @@ textsize1=16;
 textsize2=16; 
 
 //Set lowest text size (textstring3)in mm - if really 3 lines are used
-textsize3=16; 
+textsize3=16;
 
-//Hidden text size 
+/* [Hidden] */
+//Hidden text size
 HiddenTextSize=4;
+HiddenTextStyle="Regular"; //["Regular","Bold","Italic"]
+HiddenTextX=0;
+HiddenTextY=0;
+HiddenTextDepth=1;
+/* [Main Parameters] */
 
 //Distance between the two lines in font height
 distance=1.2;
@@ -228,7 +234,7 @@ realtextsize3=textsize3*(fontname3_final=="Press Start 2P"?1.5:1);
 fullfont1=str(fontname1_final,":style=",fontstyle1);
 fullfont2=str(fontname2_final,":style=",fontstyle2_final);
 fullfont3=str(fontname3_final,":style=",fontstyle3_final);
-fullfont_hidden=str(fontname_hiddentext_final,":style=",fontstyle1);
+fullfont_hidden=str(fontname_hiddentext_final,":style=",HiddenTextStyle);
 emoji_font_full=str(emoji_font,":style=",emoji_font_style);
 halignvalue = textalign;
 
@@ -1069,9 +1075,9 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
                     MagnetHolder(magnettype,"subtract");
                     
                     //cutout text
-                    if (HiddenText!="")           
-                        translate([0,0,-.01])
-                            linear_extrude(height=min(baseheight/2,1), twist=0, slices=1, $fn=32, convexity = 5)       
+                    if (HiddenText!="")
+                        translate([HiddenTextX,HiddenTextY,-.01])
+                            linear_extrude(height=HiddenTextDepth, twist=0, slices=1, $fn=32, convexity = 5)
                                 scale([-1,1,1])
                                     text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center",spacing=letter_spacing_scale);
                 }
@@ -1134,8 +1140,8 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             }
 
             if (HiddenText!="")
-                translate([0,0,-.01])
-                    linear_extrude(height=min(baseheight/2,1), twist=0, slices=1, $fn=32, convexity = 5)
+                translate([HiddenTextX,HiddenTextY,-.01])
+                    linear_extrude(height=HiddenTextDepth, twist=0, slices=1, $fn=32, convexity = 5)
                         scale([-1,1,1])
                             text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center",spacing=letter_spacing_scale);
         }

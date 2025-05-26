@@ -13,6 +13,8 @@ Emoji and special characters are supported. For the best results install a font 
 
 Use the optional `special_character_y_offset` parameter to raise or lower the left and right special icons if they need slight vertical adjustment.
 
+Hidden text can also be engraved on the underside of the plate. Set the text via `HiddenText` and adjust its size with `HiddenTextSize`. The new parameters `HiddenTextStyle`, `HiddenTextX`, `HiddenTextY` and `HiddenTextDepth` control the font style, position offsets and engraving depth of this secret message.
+
 ## OpenSCAD version and `textmetrics`
 
 This script uses the `textmetrics` function, which is available in recent OpenSCAD snapshots. Install a version that includes it and enable the feature under **Edit → Preferences → Features**.
