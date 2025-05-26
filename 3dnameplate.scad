@@ -1089,49 +1089,96 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
         // --- 第一部分：实际的“底座”（通过 baseheight 挤出） ---
         color(rgb255(base_color))
         difference() {
-            if(BaseType=="Minimal_straight") {
-                linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
-                    flat_bottom_hull_text(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
-            } else if(BaseType=="Rectangle" || BaseType=="Rounded_rectangle") {
-                if(BaseType=="Rectangle")
-                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight);
-                else
+            union() {
+                if(BaseType=="Minimal_straight") {
+                    linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                        flat_bottom_hull_text(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
+                } else if(BaseType=="Rectangle" || BaseType=="Rounded_rectangle") {
+                    if(BaseType=="Rectangle")
+                        square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight);
+                    else
+                        minkowski()
+                        {
+                            translate([Rounded_rectangle_radius,Rounded_rectangle_radius,Rounded_rectangle_radius])
+                                sphere(r=Rounded_rectangle_radius,$fn=28);
+                            square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight-2*Rounded_rectangle_radius);
+                        }
+                } else if(BaseType=="Chamfered_rectangle") {
                     minkowski()
                     {
-                        translate([Rounded_rectangle_radius,Rounded_rectangle_radius,Rounded_rectangle_radius])
-                            sphere(r=Rounded_rectangle_radius,$fn=28);
-                        square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight-2*Rounded_rectangle_radius);
+                        straightpart=.4;
+                        square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
+                        cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
                     }
-            } else if(BaseType=="Chamfered_rectangle") {
-                minkowski()
-                {
-                    straightpart=.4;
-                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
-                    cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
+                } else if(BaseType=="Pedestal") {
+                    minkowski()
+                    {
+                        path_pts = [[0, 0],[1, 0],[0, 1]];
+                        straightpart=.4;
+                        square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
+                        extrude_height=baseheight-straightpart;
+                        rotate([90,0,-90])
+                            linear_extrude(height=.01, convexity = 5)
+                                scale(extrude_height)
+                                    polygon(path_pts);
+                    }
+                } else if(BaseType=="Round") {
+                    linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                        flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
+                            offset(r = base_radius_add)
+                            {
+                                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                            }
+                        }
+                } else if(BaseType=="Bottom_Line") {
+
                 }
-            } else if(BaseType=="Pedestal") {
-                minkowski()
+
+                // Add magnet holder walls if enabled
+                MagnetHolder(magnettype,"add");
+            }
+
+            // Swiss-cheese style holes pattern
+            if (BaseSwissCheeseHoleD>0)
+            {
+                HoleD = BaseSwissCheeseHoleD;  //Hole diameter
+                Holedistance=HoleD*2.5;
+                HoleRes = 24;  //Number of sides for the holes
+
+                Thickness = baseheight+2;  //Overall Thickness
+
+                HoleRows = floor(BaseSwissCheeseWidth/Holedistance)+1;
+                RowCLSpacing = Holedistance;
+                LenSpacing = 2*RowCLSpacing/sqrt(3);
+                NosLngth = floor(BaseSwissCheeseLength/LenSpacing);
+
+                translate([-BaseSwissCheeseLength/2,(textsize-8)/2+distance_line_2_to_3*(textstring1 == "" ? -.5 : (textstring2 == "" ? +.5 : 0 ) )-BaseSwissCheeseWidth/2,0])
+                translate([0.5*LenSpacing,-0.5*RowCLSpacing,baseheight/2])
                 {
-                    path_pts = [[0, 0],[1, 0],[0, 1]];
-                    straightpart=.4;
-                    square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
-                    extrude_height=baseheight-straightpart;
-                    rotate([90,0,-90])
-                        linear_extrude(height=.01, convexity = 5)
-                            scale(extrude_height)
-                                polygon(path_pts);
-                }
-            } else if(BaseType=="Round") {
-                linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
-                    flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
-                        offset(r = base_radius_add)
+                    for(rowA = [0:2:HoleRows])
+                    {
+                        for(i=[0:1:NosLngth+2])
                         {
-                            writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                            translate([i*LenSpacing,rowA*RowCLSpacing,0])
+                                rotate([0,0,180/HoleRes])
+                                    cylinder(r = HoleD,h=Thickness,center=true,$fn=HoleRes);
                         }
                     }
-            } else if(BaseType=="Bottom_Line") {
 
+                    for(rowB = [1:2:HoleRows])
+                    {
+                        for(i=[0:1:NosLngth+2])
+                        {
+                            translate([LenSpacing*(i-0.5),rowB*RowCLSpacing,0])
+                                rotate([0,0,180/HoleRes])
+                                    cylinder(r = HoleD,h=Thickness,center=true,$fn=HoleRes);
+                        }
+                    }
+                }
             }
+
+            //cutout magnets
+            MagnetHolder(magnettype,"subtract");
 
             if (HiddenText!="")
                 translate([0,0,-.01])
