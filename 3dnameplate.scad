@@ -495,17 +495,24 @@ module draw_text_line_with_emoji(str, size, normal_font, emoji_font)
 }
 
 // 2D outline of a keyhole with a circular head and narrow slot
+// 2D outline of a keyhole with a circular head and a slot opening upward.
+// The circle center is the reference point. The slot extends in +Y so that
+// it can be positioned relative to the top edge of the base.
 module KeyholeShape(d, slot_w, slot_len) {
     circle(d = d, $fn = 32);
-    translate([0, -slot_len/2, 0])
+    translate([0, slot_len/2, 0])
         square([slot_w, slot_len], center = true);
 }
 
 // Extruded keyhole cutout including deeper pocket for the screw head
+// Extrude the narrow slot first, then carve a deeper pocket matching the
+// circle diameter so a screw head can be captured.
 module KeyholeCutout(d, slot_w, slot_len, depth, head_depth) {
+    // Narrow portion reaching the surface
     linear_extrude(height = depth)
         KeyholeShape(d, slot_w, slot_len);
-    translate([0, 0, -head_depth])
+    // Wider cavity for the screw head inside the base
+    translate([0, 0, depth - head_depth])
         linear_extrude(height = head_depth)
             KeyholeShape(d, d, slot_len);
 }
