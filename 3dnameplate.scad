@@ -174,6 +174,9 @@ border_side=5;
 //rounding for the rounded rectangle (additional to the baseheight!)
 Rounded_rectangle_radius=.4;
 
+//global corner rounding for all parts (0 disables smoothing)
+global_corner_radius = 0;
+
 //-----------------
 /* [Bottom Line Settings] */ 
 
@@ -1057,6 +1060,24 @@ module rotate_extrude2(angle=360, convexity=2, xsize=100,yzsize=100) {
 }
 
 //------------------
+// Optional global rounding applied to all generated geometry
+module apply_global_corner_radius() {
+    if (global_corner_radius > 0) {
+        difference() {
+            minkowski() {
+                children();
+                sphere(r=global_corner_radius);
+            }
+            // remove the bottom half-sphere so the base stays flat
+            translate([-1000, -1000, -global_corner_radius])
+                cube([2000, 2000, global_corner_radius]);
+        }
+    } else {
+        children();
+    }
+}
+
+//------------------
 module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction="up")
 {
     
@@ -1376,17 +1397,21 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 //rotate([-90,0,180])
 if(part_to_generate=="sweeping_text")
 {
-    RiseText(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3, direction);
+    apply_global_corner_radius()
+        RiseText(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3, direction);
 }
 else if(part_to_generate=="base_text_caps")
 {
-    BaseTextCaps(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3);
+    apply_global_corner_radius()
+        BaseTextCaps(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3);
 }
 else
 {
-    color(rgb255(text_color))
-        linear_extrude(height=letter_caps_thickness,convexity = 10)
-            writetext(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
+    apply_global_corner_radius() {
+        color(rgb255(text_color))
+            linear_extrude(height=letter_caps_thickness,convexity = 10)
+                writetext(textstring1, textstring2, textstring3, textsize1, textsize2, textsize3,0);
+    }
 }
 
 

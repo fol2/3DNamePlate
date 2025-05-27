@@ -19,6 +19,8 @@ Hidden text can also be engraved on the underside of the plate. Set the text via
 
 When the base style is set to **Round**, the `round_base_link_thickness` parameter can add slim connectors along each text line before the base is offset. These bars help link separated letters into a single circular plate. Set it to `0` to disable the connectors.
 
+The new `global_corner_radius` option softens corners of both the base and the raised letters. Set it to a positive value to round every exposed edge. Leaving it at `0` keeps the geometry sharp.
+
 ## OpenSCAD version and `textmetrics`
 
 This script uses the `textmetrics` function, which is available in recent OpenSCAD snapshots. Install a version that includes it and enable the feature under **Edit → Preferences → Features**.
