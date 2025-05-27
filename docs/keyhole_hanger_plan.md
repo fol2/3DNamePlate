@@ -32,16 +32,16 @@ but not breaking through the top edge of the base.
 ## Geometry
 
 A helper module `KeyholeShape(d, slot_w, slot_len)` will generate a 2D shape
-consisting of a circle and a downward slot. This profile describes the outline
-visible from the back of the plate. A second, slightly deeper extrusion widens
-the slot so that its internal width equals the circle diameter. This step
+consisting of a circle and an upward-pointing slot. This profile describes the
+outline visible from the back of the plate. A second, slightly deeper extrusion
+widens the slot so that its internal width equals the circle diameter. This step
 creates a cavity to capture the screw head while maintaining a narrow slot
 opening.
 
 ```
 module KeyholeShape(d, slot_w, slot_len) {
     circle(r = d/2, $fn = 32);
-    translate([0, -slot_len/2, 0])
+    translate([0, slot_len/2, 0])
         square([slot_w, slot_len], center = true);
 }
 
@@ -49,7 +49,7 @@ module KeyholeCutout(d, slot_w, slot_len, depth, head_depth) {
     // narrow slot reaching the surface
     linear_extrude(depth) KeyholeShape(d, slot_w, slot_len);
     // deeper pocket matching the hole diameter for the screw head
-    translate([0, 0, -head_depth])
+    translate([0, 0, depth - head_depth])
         linear_extrude(head_depth)
             KeyholeShape(d, d, slot_len);
 }
