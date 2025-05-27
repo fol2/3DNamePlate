@@ -25,6 +25,7 @@ Example parameters:
 - `keyhole_balance_offset`: horizontal offset from the geometric center used
   when a single keyhole is placed. Allows balancing by weight rather than by
   length alone.
+- `keyhole_bleed`: extra depth added so the cutout fully removes material.
 
 Default values will provide a typical small-screw keyhole and place it close to
 but not breaking through the top edge of the base.

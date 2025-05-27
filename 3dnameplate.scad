@@ -251,6 +251,9 @@ keyhole_vertical_offset = 0; //[-100:0.1:100]
 //Horizontal offset for balancing (mm)
 keyhole_balance_offset = 0; //[-100:0.1:100]
 
+//Extra bleed depth to ensure the keyhole cutout fully subtracts
+keyhole_bleed = 0.1; //[0:0.05:0.5]
+
 //-----------------
 /* [Base Swiss Settings] */ 
 
@@ -271,7 +274,7 @@ assert(tm_feature_check.size.x > 0,
            "Edit \u2192 Preferences \u2192 Features \u2192 textmetrics"));
 
 // Ensure the keyhole recess does not exceed the base thickness
-assert(keyhole_depth + keyhole_head_depth < baseheight,
+assert(keyhole_depth + keyhole_head_depth + keyhole_bleed < baseheight,
        "keyhole_depth must be less than baseheight");
 
 fontname1_final = (fontname1_override!="" ? fontname1_override : fontname1);
@@ -507,26 +510,27 @@ module KeyholeShape(d, slot_w, slot_len) {
 // Extruded keyhole cutout including deeper pocket for the screw head
 // Extrude the narrow slot first, then carve a deeper pocket matching the
 // circle diameter so a screw head can be captured.
-module KeyholeCutout(d, slot_w, slot_len, depth, head_depth) {
-    // Narrow portion reaching the surface
-    linear_extrude(height = depth)
-        KeyholeShape(d, slot_w, slot_len);
+module KeyholeCutout(d, slot_w, slot_len, depth, head_depth, bleed) {
+    // Slight bleed ensures the subtraction does not leave artifacts
+    translate([0, 0, -bleed])
+        linear_extrude(height = depth + bleed)
+            KeyholeShape(d, slot_w, slot_len);
     // Wider cavity for the screw head inside the base
-    translate([0, 0, depth - head_depth])
-        linear_extrude(height = head_depth)
+    translate([0, 0, depth - head_depth - bleed])
+        linear_extrude(height = head_depth + bleed)
             KeyholeShape(d, d, slot_len);
 }
 
 // Place one or two keyholes on the back of the base
 module KeyholeCutouts(count, spacing, d, slot_w, slot_len,
-                      depth, head_depth, vert_off, balance_off) {
+                      depth, head_depth, vert_off, balance_off, bleed) {
     positions = (count == 2) ? [balance_off - spacing/2,
                                 balance_off + spacing/2] :
                                 (count == 1 ? [balance_off] : []);
     y_pos = cutcube_yz/2 - vert_off;
     for(xp = positions)
         translate([xp, y_pos, 0])
-            KeyholeCutout(d, slot_w, slot_len, depth, head_depth);
+            KeyholeCutout(d, slot_w, slot_len, depth, head_depth, bleed);
 }
 
 
@@ -1328,7 +1332,7 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
                                keyhole_diameter, keyhole_slot_width,
                                keyhole_slot_length, keyhole_depth,
                                keyhole_head_depth, keyhole_vertical_offset,
-                               keyhole_balance_offset);
+                               keyhole_balance_offset, keyhole_bleed);
 
             if (HiddenText!="")
                 translate([HiddenTextX,HiddenTextY,-.01])
