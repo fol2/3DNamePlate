@@ -329,6 +329,17 @@ xsize2 = compute_text_width(textstring2, textsize2, fullfont2);
 xsize3 = compute_text_width(textstring3, textsize3, fullfont3);
 textwidth=max(xsize1,xsize2,xsize3);
 shifttext=(textalign=="center")? -textwidth/2 : (textalign=="right")? -textwidth : 0;
+
+// Horizontal offset for each text line when aligning the round base link bars
+xpos1 = (textalign=="center") ? (textwidth - xsize1)/2
+      : (textalign=="right") ? (textwidth - xsize1)
+      : 0;
+xpos2 = (textalign=="center") ? (textwidth - xsize2)/2
+      : (textalign=="right") ? (textwidth - xsize2)
+      : 0;
+xpos3 = (textalign=="center") ? (textwidth - xsize3)/2
+      : (textalign=="right") ? (textwidth - xsize3)
+      : 0;
       
 
 //************** todo
