@@ -222,6 +222,36 @@ wiggle_magnet_depth=.4;
 magnet_closing_layer=0;
 
 //-----------------
+/* [Keyhole Settings] */
+
+//Number of keyholes to cut into the back of the base
+keyhole_count = 0; //[0:1:2]
+
+//Spacing between two keyholes when count is 2 (mm)
+keyhole_spacing = 40; //[10:1:200]
+
+//Diameter of the circular section (mm)
+keyhole_diameter = 4; //[2:0.1:20]
+
+//Width of the slot portion (mm)
+keyhole_slot_width = 3; //[1:0.1:20]
+
+//Length of the slot measured from the circle center (mm)
+keyhole_slot_length = 6; //[2:0.1:40]
+
+//Depth of the keyhole cut (mm)
+keyhole_depth = 2; //[0.5:0.1:20]
+
+//Additional pocket depth for the screw head (mm)
+keyhole_head_depth = 1; //[0:0.1:20]
+
+//Vertical distance from the top edge to the circle center (mm)
+keyhole_vertical_offset = 2; //[0:0.1:100]
+
+//Horizontal offset for balancing (mm)
+keyhole_balance_offset = 0; //[-100:0.1:100]
+
+//-----------------
 /* [Base Swiss Settings] */ 
 
 //You can have several holes in the base in a regular pattern. Use it if you need a hole for a magnet/fixture in a few positions. You activate the holes by setting a non-zero value (e.g. 5mm)
@@ -239,6 +269,10 @@ assert(tm_feature_check.size.x > 0,
        str("ERROR: textmetrics() feature not enabled.\n",
            "Install a recent OpenSCAD snapshot and activate\n",
            "Edit \u2192 Preferences \u2192 Features \u2192 textmetrics"));
+
+// Ensure the keyhole recess does not exceed the base thickness
+assert(keyhole_depth + keyhole_head_depth < baseheight,
+       "keyhole_depth must be less than baseheight");
 
 fontname1_final = (fontname1_override!="" ? fontname1_override : fontname1);
 fontname2_final = (fontname2_override!="" ? fontname2_override : (fontname2=="<same as fontname1>" ? fontname1_final : fontname2));
@@ -447,6 +481,34 @@ module draw_text_line_with_emoji(str, size, normal_font, emoji_font)
                      halign="left", valign="center",
                      spacing=letter_spacing_scale);
     }
+}
+
+// 2D outline of a keyhole with a circular head and narrow slot
+module KeyholeShape(d, slot_w, slot_len) {
+    circle(d = d, $fn = 32);
+    translate([0, -slot_len/2, 0])
+        square([slot_w, slot_len], center = true);
+}
+
+// Extruded keyhole cutout including deeper pocket for the screw head
+module KeyholeCutout(d, slot_w, slot_len, depth, head_depth) {
+    linear_extrude(height = depth)
+        KeyholeShape(d, slot_w, slot_len);
+    translate([0, 0, -head_depth])
+        linear_extrude(height = head_depth)
+            KeyholeShape(d, d, slot_len);
+}
+
+// Place one or two keyholes on the back of the base
+module KeyholeCutouts(count, spacing, d, slot_w, slot_len,
+                      depth, head_depth, vert_off, balance_off) {
+    positions = (count == 2) ? [balance_off - spacing/2,
+                                balance_off + spacing/2] :
+                                (count == 1 ? [balance_off] : []);
+    y_pos = cutcube_yz/2 - vert_off;
+    for(xp = positions)
+        translate([xp, y_pos, 0])
+            KeyholeCutout(d, slot_w, slot_len, depth, head_depth);
 }
 
 
@@ -1241,6 +1303,14 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 
             //cutout magnets
             MagnetHolder(magnettype,"subtract");
+
+            //cutout keyhole hangers if enabled
+            if (keyhole_count > 0)
+                KeyholeCutouts(keyhole_count, keyhole_spacing,
+                               keyhole_diameter, keyhole_slot_width,
+                               keyhole_slot_length, keyhole_depth,
+                               keyhole_head_depth, keyhole_vertical_offset,
+                               keyhole_balance_offset);
 
             if (HiddenText!="")
                 translate([HiddenTextX,HiddenTextY,-.01])
