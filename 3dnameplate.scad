@@ -136,6 +136,9 @@ border_side=5;
 //rounding for the rounded rectangle (additional to the baseheight!)
 Rounded_rectangle_radius=.4;
 
+//global fillet radius applied to the finished plate (0 disables)
+global_corner_radius = 0; //[0:0.1:5]
+
 //-----------------
 /* [Bottom Line Settings] */ 
 
@@ -920,150 +923,153 @@ module rotate_extrude2(angle=360, convexity=2, xsize=100,yzsize=100) {
 }
 
 //------------------
-module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction="up")
-{
-    
-    rotate([0,-90,0])
-    {
+module _rise_text_core(textstr1, textstr2, textstr3,
+                       textsize1, textsize2, textsize3,
+                       direction="up") {
+    color(rgb255(text_color))
+    difference() {
+        union() {
+            //text as rotation for a certain angle
+            rotate([0,0,90-cutangle+0.0001])
+                rotate_extrude2(angle=cutangle, convexity = 10, xsize=cutcube_x, yzsize=cutcube_yz, $fn = faces)
+                    translate([(direction=="up"?text_excenter : specialchar_y*2+text_excenter )  , 0, 0])
+                        rotate([0,0,(direction=="up"?-1:1)*90])
+                            writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
 
-        color(rgb255(text_color))
-        difference()
-        {
-            union()
-            {
-                //text as rotation for a certain angle
-                rotate([0,0,90-cutangle+0.0001]) 
-                    rotate_extrude2(angle=cutangle, convexity = 10, xsize=cutcube_x, yzsize=cutcube_yz, $fn = faces)
-                        translate([(direction=="up"?text_excenter : specialchar_y*2+text_excenter )  , 0, 0])
-                            rotate([0,0,(direction=="up"?-1:1)*90])
-                                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
-            
-                //magnet holder
-                translate([(direction=="up"?-1:0)*baseheight, (direction=="up"?text_excenter:specialchar_y*2+text_excenter) , 0])
-                    rotate([0,(direction=="up"?1:-1)*90,0])scale([1,(direction=="up"?1:-1),1])
-                        MagnetHolder(magnettype,"add");
-            }
-                           
-            //cut out in magnet holder
-            translate([(direction=="up"?-1:0)*baseheight-.1, (direction=="up"?text_excenter:specialchar_y*2+text_excenter) , 0])
+            //magnet holder
+            translate([(direction=="up"?-1:0)*baseheight, (direction=="up"?text_excenter:specialchar_y*2+text_excenter) , 0])
                 rotate([0,(direction=="up"?1:-1)*90,0])scale([1,(direction=="up"?1:-1),1])
-                    MagnetHolder(magnettype,"subtract");
+                    MagnetHolder(magnettype,"add");
         }
-        
-        //create base
-        color(rgb255(base_color))
-        translate([(direction=="up"?-1:0)*baseheight, (direction=="up"?text_excenter:specialchar_y*2+text_excenter) , 0])
+
+        //cut out in magnet holder
+        translate([(direction=="up"?-1:0)*baseheight-.1, (direction=="up"?text_excenter:specialchar_y*2+text_excenter) , 0])
             rotate([0,(direction=="up"?1:-1)*90,0])scale([1,(direction=="up"?1:-1),1])
-                difference()
-                {
-                    if(BaseType=="Minimal_straight")
-                        linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5) 
-                            hull()
-                                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
-            
-                    
-                    if(BaseType=="Rectangle" || BaseType=="Rounded_rectangle")        
-                        if(BaseType=="Rectangle")    
-                        {
-                          square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight);
-                        }
-                        else //Rounded_rectangle
-                        {
-                            minkowski()
-                            {
-                                translate([Rounded_rectangle_radius,Rounded_rectangle_radius,Rounded_rectangle_radius])
-                                    sphere(r=Rounded_rectangle_radius,$fn=28);
-                                square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight-2*Rounded_rectangle_radius);        
-                            }
-                        }            
-                  
-                        
-                    if(BaseType=="Chamfered_rectangle")        
-                        minkowski()
-                        { 
-                            straightpart=.4;
-                            square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
-                            cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
-                        }      
+                MagnetHolder(magnettype,"subtract");
+    }
 
-                    if(BaseType=="Pedestal")        
-                        minkowski()
-                        { 
-                            path_pts = [[0, 0],[1, 0],[0, 1]];
-                            
-                            straightpart=.4;
-                            
-                            square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,straightpart);
-                            
-                            //cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
-                            extrude_height=baseheight-straightpart;
-                            
-                            rotate([90,0,-90])
-                                linear_extrude(height=.01, convexity = 5)
-                                    scale(extrude_height)
-                                        polygon(path_pts);
-                        }                   
-            
-                    if(BaseType=="Round")        
-                        linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5) 
-                            offset(r = base_radius_add) 
-                            {
-                                writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
-                            }               
+    //create base
+    color(rgb255(base_color))
+    translate([(direction=="up"?-1:0)*baseheight, (direction=="up"?text_excenter:specialchar_y*2+text_excenter) , 0])
+        rotate([0,(direction=="up"?1:-1)*90,0])scale([1,(direction=="up"?1:-1),1])
+            difference() {
+                if(BaseType=="Minimal_straight")
+                    linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                        hull()
+                            writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,0);
 
-                    if (BaseSwissCheeseHoleD>0)
-                    {
-                        //This is a parametric script for generating footplates
-                        //with holes with various number of sides.
-                        // Created by Hamish Trolove - Oct 2018
-                        //www.techmonkeybusiness.com
+                if(BaseType=="Rectangle" || BaseType=="Rounded_rectangle")
+                    if(BaseType=="Rectangle") {
+                      square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight);
+                    } else {
+                        minkowski() {
+                            translate([Rounded_rectangle_radius,Rounded_rectangle_radius,Rounded_rectangle_radius])
+                                sphere(r=Rounded_rectangle_radius,$fn=28);
+                            square_hull_of_object(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,baseheight-2*Rounded_rectangle_radius);
 
-                        HoleD = BaseSwissCheeseHoleD;  //Hole diameter
-                        Holedistance=HoleD*2.5;
-                        HoleRes = 24;  //Number of sides for the holes                            
-                        Thickness = baseheight+2;  //Overall Thickness
- 
-                        HoleRows = floor(BaseSwissCheeseWidth/Holedistance)+1;  
-                        RowCLSpacing = Holedistance;
-                        LenSpacing = 2*RowCLSpacing/sqrt(3);
-                        NosLngth = floor(BaseSwissCheeseLength/LenSpacing);
-
-
-                        translate([-BaseSwissCheeseLength/2,(textsize-8)/2+distance_line_2_to_3*(textstring1 == "" ? -.5 : (textstring2 == "" ? +.5 : 0 ) )-BaseSwissCheeseWidth/2,0])
-                        translate([0.5*LenSpacing,-0.5*RowCLSpacing,baseheight/2]) 
-                        {
-                            for(rowA = [0:2:HoleRows])
-                            {
-                                for(i=[0:1:NosLngth+2])
-                                {
-                                    translate([i*LenSpacing,rowA*RowCLSpacing,0])
-                                        rotate([0,0,180/HoleRes])
-                                            cylinder(r = HoleD,h=Thickness,center=true,$fn=HoleRes);
-                                }
-                            }
-                            
-                            for(rowB = [1:2:HoleRows])
-                            {
-                                for(i=[0:1:NosLngth+2])
-                                {
-                                    translate([LenSpacing*(i-0.5),rowB*RowCLSpacing,0])
-                                        rotate([0,0,180/HoleRes])
-                                            cylinder(r = HoleD,h=Thickness,center=true,$fn=HoleRes);
-                                }
-                            }
                         }
                     }
 
-                    //cutout magnets
-                    MagnetHolder(magnettype,"subtract");
-                    
-                    //cutout text
-                    if (HiddenText!="")
-                        translate([HiddenTextX,HiddenTextY,-.01])
-                            linear_extrude(height=HiddenTextDepth, twist=0, slices=1, $fn=32, convexity = 5)
-                                scale([-1,1,1])
-                                    text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center",spacing=letter_spacing_scale);
+                if(BaseType=="Chamfered_rectangle")
+                    minkowski() {
+                        straightpart=.4;
+                        square_hull_of_object(textstr1, textstr2, textstr3,textsize1, textsize2, textsize3,straightpart);
+                        cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
+                    }
+
+                if(BaseType=="Pedestal")
+                    minkowski() {
+                        path_pts = [[0, 0],[1, 0],[0, 1]];
+
+                        straightpart=.4;
+
+                        square_hull_of_object(textstr1, textstr2, textstr3,textsize1, textsize2, textsize3,straightpart);
+
+                        //cylinder(r1=baseheight-straightpart,r2=0,h=baseheight-straightpart,$fn=4);
+                        extrude_height=baseheight-straightpart;
+
+                        rotate([90,0,-90])
+                            linear_extrude(height=.01, convexity = 5)
+                                scale(extrude_height)
+                                    polygon(path_pts);
+                    }
+
+                if(BaseType=="Round")
+                    linear_extrude(height=baseheight, twist=0, slices=1, $fn=32, convexity = 5)
+                        offset(r = base_radius_add)
+                        {
+                            writetext(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3,1);
+                        }
+
+                if (BaseSwissCheeseHoleD>0)
+                {
+                    //This is a parametric script for generating footplates
+                    //with holes with various number of sides.
+                    // Created by Hamish Trolove - Oct 2018
+                    //www.techmonkeybusiness.com
+
+                    HoleD = BaseSwissCheeseHoleD;  //Hole diameter
+                    Holedistance=HoleD*2.5;
+                    HoleRes = 24;  //Number of sides for the holes
+
+                    Thickness = baseheight+2;  //Overall Thickness
+
+                    HoleRows = floor(BaseSwissCheeseWidth/Holedistance)+1;
+                    RowCLSpacing = Holedistance;
+                    LenSpacing = 2*RowCLSpacing/sqrt(3);
+                    NosLngth = floor(BaseSwissCheeseLength/LenSpacing);
+
+
+                    translate([-BaseSwissCheeseLength/2,(textsize-8)/2+distance_line_2_to_3*(textstring1 == "" ? -.5 : (textstring2 == "" ? +.5 : 0 ) )-BaseSwissCheeseWidth/2,0])
+                    translate([0.5*LenSpacing,-0.5*RowCLSpacing,baseheight/2])
+                    {
+                        for(rowA = [0:2:HoleRows])
+                        {
+                            for(i=[0:1:NosLngth+2])
+                            {
+                                translate([i*LenSpacing,rowA*RowCLSpacing,0])
+                                    rotate([0,0,180/HoleRes])
+                                        cylinder(r = HoleD,h=Thickness,center=true,$fn=HoleRes);
+                            }
+                        }
+
+                        for(rowB = [1:2:HoleRows])
+                        {
+                            for(i=[0:1:NosLngth+2])
+                            {
+                                translate([LenSpacing*(i-0.5),rowB*RowCLSpacing,0])
+                                    rotate([0,0,180/HoleRes])
+                                        cylinder(r = HoleD,h=Thickness,center=true,$fn=HoleRes);
+                            }
+                        }
+                    }
                 }
+
+                //cutout magnets
+                MagnetHolder(magnettype,"subtract");
+
+                //cutout text
+                if (HiddenText!="")
+                    translate([HiddenTextX,HiddenTextY,-.01])
+                        linear_extrude(height=HiddenTextDepth, twist=0, slices=1, $fn=32, convexity = 5)
+                            scale([-1,1,1])
+                                text(HiddenText,size=HiddenTextSize,font=fullfont_hidden,halign="center",valign="center",spacing=letter_spacing_scale);
+            }
+}
+
+module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction="up")
+{
+
+    rotate([0,-90,0])
+    {
+        if (global_corner_radius > 0) {
+            minkowski() {
+                _rise_text_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction);
+                cylinder(r = global_corner_radius, h = 0.1, center = true, $fn = 16);
+            }
+        } else {
+            _rise_text_core(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, direction);
+        }
     }
 }
 
@@ -1073,8 +1079,18 @@ module RiseText(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3, d
 
 module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize3)
 {
-    union()
-    {
+    if (global_corner_radius > 0) {
+        minkowski() {
+            _base_text_caps_core();
+            cylinder(r = global_corner_radius, h = 0.1, center = true, $fn = 16);
+        }
+    } else {
+        _base_text_caps_core();
+    }
+}
+
+module _base_text_caps_core() {
+    union() {
         // --- 第一部分：实际的“底座”（通过 baseheight 挤出） ---
         color(rgb255(base_color))
         difference() {
@@ -1226,7 +1242,7 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             }
         }
     }
-}
+    }
 
 //rotate([-90,0,180])
 if(part_to_generate=="sweeping_text")
