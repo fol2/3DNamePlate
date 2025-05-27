@@ -33,3 +33,8 @@ Ignoring unknown function 'textmetrics'
 ## Purpose
 
 The goal of the project is to quickly create attractive curved or pedestal style name plates that can be 3D‑printed. Adjust the parameters in the script to generate a personalized STL ready for printing.
+
+
+### Keyhole Hangers
+
+`base_text_caps` plates can include optional keyhole hangers for wall mounting. Enable them in the **Keyhole Settings** section of the customizer. Two keyholes can be spaced apart, or a single hanger can be shifted horizontally to balance the plate.
