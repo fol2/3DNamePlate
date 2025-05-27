@@ -246,7 +246,7 @@ keyhole_depth = 2; //[0.5:0.1:20]
 keyhole_head_depth = 1; //[0:0.1:20]
 
 //Vertical distance from the top edge to the circle center (mm)
-keyhole_vertical_offset = 2; //[0:0.1:100]
+keyhole_vertical_offset = 0; //[-100:0.1:100]
 
 //Horizontal offset for balancing (mm)
 keyhole_balance_offset = 0; //[-100:0.1:100]
