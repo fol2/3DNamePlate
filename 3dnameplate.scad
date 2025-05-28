@@ -248,6 +248,12 @@ keyhole_head_depth = 1; //[0:0.1:20]
 //Vertical distance from the top edge to the circle center (mm)
 keyhole_vertical_offset = 0; //[-100:0.1:100]
 
+//Height of a protruding support around the keyhole (mm)
+keyhole_support_height = 0; //[0:0.1:20]
+
+//Offset margin applied to the support outline (mm)
+keyhole_support_margin = 0.4; //[0:0.05:2]
+
 //Horizontal offset for balancing (mm)
 keyhole_balance_offset = 0; //[-100:0.1:100]
 
@@ -536,22 +542,22 @@ module KeyholeCutout(d, slot_w, slot_len, depth, head_depth, bleed) {
 
 // Extrude the keyhole shape upward to form a hanging support
 // A tiny offset margin helps the support merge cleanly with the base
-module KeyholeSupport(d, slot_w, slot_len, baseheight, margin=0.2) {
-    linear_extrude(height = baseheight)
+module KeyholeSupport(d, slot_w, slot_len, support_height, margin=0.2) {
+    linear_extrude(height = support_height)
         offset(delta = margin)
             KeyholeShape(d, slot_w, slot_len);
 }
 
 // Create one or two keyhole supports positioned like the cutouts
 module KeyholeSupports(count, spacing, d, slot_w, slot_len,
-                       baseheight, vert_off, balance_off, margin=0.2) {
+                       support_height, vert_off, balance_off, margin=0.2) {
     positions = (count == 2) ? [balance_off - spacing/2,
                                 balance_off + spacing/2] :
                                 (count == 1 ? [balance_off] : []);
     y_pos = cutcube_yz/2 - vert_off;
     for(xp = positions)
         translate([xp, y_pos, 0])
-            KeyholeSupport(d, slot_w, slot_len, baseheight, margin);
+            KeyholeSupport(d, slot_w, slot_len, support_height, margin);
 }
 
 // Place one or two keyholes on the back of the base
@@ -1313,15 +1319,15 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 
                 }
 
-                // Add protruding keyhole hanger support when positioned above
-                // the base. Must be part of the base geometry before any
-                // subtractive operations occur.
-                if (keyhole_count > 0 && keyhole_vertical_offset < 0)
+                // Optionally add a protruding support around the keyhole
+                // before any subtractive operations occur.
+                if (keyhole_count > 0 && keyhole_support_height > 0)
                     KeyholeSupports(keyhole_count, keyhole_spacing,
                                     keyhole_diameter, keyhole_slot_width,
-                                    keyhole_slot_length, baseheight,
+                                    keyhole_slot_length, keyhole_support_height,
                                     keyhole_vertical_offset,
-                                    keyhole_balance_offset);
+                                    keyhole_balance_offset,
+                                    keyhole_support_margin);
 
                 // Add magnet holder walls if enabled
                 MagnetHolder(magnettype,"add");
