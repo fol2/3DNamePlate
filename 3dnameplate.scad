@@ -260,6 +260,9 @@ keyhole_balance_offset = 0; //[-100:0.1:100]
 //Extra bleed depth to ensure the keyhole cutout fully subtracts
 keyhole_bleed = 0.1; //[0:0.05:0.5]
 
+//Height of protruding keyhole support (mm)
+keyhole_support_height = 2; //[0:0.1:20]
+
 //-----------------
 /* [Base Swiss Settings] */ 
 
@@ -542,22 +545,23 @@ module KeyholeCutout(d, slot_w, slot_len, depth, head_depth, bleed) {
 
 // Extrude the keyhole shape upward to form a hanging support
 // A tiny offset margin helps the support merge cleanly with the base
-module KeyholeSupport(d, slot_w, slot_len, support_height, margin=0.2) {
-    linear_extrude(height = support_height)
-        offset(delta = margin)
-            KeyholeShape(d, slot_w, slot_len);
+module KeyholeSupport(d, slot_w, slot_len, height, margin=0.2) {
+    translate([0, 0, -height])
+        linear_extrude(height = height)
+            offset(delta = margin)
+                KeyholeShape(d, slot_w, slot_len);
 }
 
 // Create one or two keyhole supports positioned like the cutouts
 module KeyholeSupports(count, spacing, d, slot_w, slot_len,
-                       support_height, vert_off, balance_off, margin=0.2) {
+                       height, vert_off, balance_off, margin=0.2) {
     positions = (count == 2) ? [balance_off - spacing/2,
                                 balance_off + spacing/2] :
                                 (count == 1 ? [balance_off] : []);
     y_pos = cutcube_yz/2 - vert_off;
     for(xp = positions)
         translate([xp, y_pos, 0])
-            KeyholeSupport(d, slot_w, slot_len, support_height, margin);
+            KeyholeSupport(d, slot_w, slot_len, height, margin);
 }
 
 // Place one or two keyholes on the back of the base
