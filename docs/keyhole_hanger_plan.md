@@ -33,17 +33,20 @@ but not breaking through the top edge of the base.
 ## Geometry
 
 A helper module `KeyholeShape(d, slot_w, slot_len)` will generate a 2D shape
-consisting of a circle and an upward-pointing slot. This profile describes the
-outline visible from the back of the plate. A second, slightly deeper extrusion
-widens the slot so that its internal width equals the circle diameter. This step
-creates a cavity to capture the screw head while maintaining a narrow slot
-opening.
+consisting of a circle and an upward-pointing slot terminated with a rounded end.
+This profile describes the outline visible from the back of the plate. A second,
+slightly deeper extrusion widens the slot so that its internal width equals the
+circle diameter. This step creates a cavity to capture the screw head while
+maintaining a narrow slot opening.
 
 ```
 module KeyholeShape(d, slot_w, slot_len) {
     circle(r = d/2, $fn = 32);
     translate([0, slot_len/2, 0])
         square([slot_w, slot_len], center = true);
+    // semicircular end to the slot
+    translate([0, slot_len, 0])
+        circle(r = slot_w/2, $fn = 32);
 }
 
 module KeyholeCutout(d, slot_w, slot_len, depth, head_depth) {
@@ -104,8 +107,8 @@ simultaneously if desired.
 
 ## Considerations
 
-- The keyhole depth should not exceed the base thickness. A simple assertion can
-  warn the user if `keyhole_depth >= baseheight`.
+- The keyhole recess depth is automatically clamped so it never exceeds the
+  base thickness. A warning is printed when this reduction occurs.
 - When only one keyhole is used, consider measuring the weight distribution of
   the final print and setting `keyhole_balance_offset` accordingly so the plate
   hangs level. The same offset is applied to two-keyhole layouts.
@@ -117,4 +120,4 @@ simultaneously if desired.
 
 The initial implementation focuses on `base_text_caps`, but the geometry could
 be reused for other base types in the future. Additional customization such as
-rounded slot ends or tapered slots may be added based on feedback.
+tapered slots may be added based on feedback.
