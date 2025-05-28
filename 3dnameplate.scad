@@ -515,10 +515,12 @@ module KeyholeCutout(d, slot_w, slot_len, depth, head_depth, bleed) {
     translate([0, 0, -bleed])
         linear_extrude(height = depth + bleed)
             KeyholeShape(d, slot_w, slot_len);
-    // Wider cavity for the screw head inside the base
-    translate([0, 0, depth - head_depth - bleed])
+    // Pocket for the screw head positioned at the end of the slot
+    // Wide enough along the entire slot so the head can slide to the end
+    translate([0, slot_len, depth - head_depth - bleed])
         linear_extrude(height = head_depth + bleed)
-            KeyholeShape(d, d, slot_len);
+            mirror([0, 1, 0])
+                KeyholeShape(d, d, slot_len);
 }
 
 // Place one or two keyholes on the back of the base
