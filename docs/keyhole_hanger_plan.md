@@ -49,10 +49,11 @@ module KeyholeShape(d, slot_w, slot_len) {
 module KeyholeCutout(d, slot_w, slot_len, depth, head_depth) {
     // narrow slot reaching the surface
     linear_extrude(depth) KeyholeShape(d, slot_w, slot_len);
-    // circular pocket at the end of the slot for the screw head
+    // wider pocket placed at the end so the screw head can slide along
     translate([0, slot_len, depth - head_depth])
         linear_extrude(head_depth)
-            circle(r = d/2, $fn = 32);
+            mirror([0, 1, 0])
+                KeyholeShape(d, d, slot_len);
 }
 ```
 
