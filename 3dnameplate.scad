@@ -510,6 +510,9 @@ module KeyholeShape(d, slot_w, slot_len) {
     circle(d = d, $fn = 32);
     translate([0, slot_len/2, 0])
         square([slot_w, slot_len], center = true);
+    // Round off the end of the slot with a semicircle
+    translate([0, slot_len, 0])
+        circle(d = slot_w, $fn = 32);
 }
 
 // Extruded keyhole cutout including deeper pocket for the screw head
@@ -521,11 +524,9 @@ module KeyholeCutout(d, slot_w, slot_len, depth, head_depth, bleed) {
         linear_extrude(height = depth + bleed)
             KeyholeShape(d, slot_w, slot_len);
     // Pocket for the screw head positioned at the end of the slot
-    // Wide enough along the entire slot so the head can slide to the end
     translate([0, slot_len, depth - head_depth - bleed])
         linear_extrude(height = head_depth + bleed)
-            mirror([0, 1, 0])
-                KeyholeShape(d, d, slot_len);
+            circle(d = d, $fn = 32);
 }
 
 // Place one or two keyholes on the back of the base
