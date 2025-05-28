@@ -37,4 +37,4 @@ The goal of the project is to quickly create attractive curved or pedestal style
 
 ### Keyhole Hangers
 
-`base_text_caps` plates can include optional keyhole hangers for wall mounting. Enable them in the **Keyhole Settings** section of the customizer. Two keyholes can be spaced apart, or a single hanger can be shifted horizontally to balance the plate.
+`base_text_caps` plates can include optional keyhole hangers for wall mounting. Enable them in the **Keyhole Settings** section of the customizer. Two keyholes can be spaced apart, or a single hanger can be shifted horizontally to balance the plate. If the combined keyhole depth would exceed the base thickness, it is automatically reduced and a warning is printed during rendering.

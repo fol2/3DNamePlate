@@ -100,8 +100,8 @@ simultaneously if desired.
 
 ## Considerations
 
-- The keyhole depth should not exceed the base thickness. A simple assertion can
-  warn the user if `keyhole_depth >= baseheight`.
+- The keyhole recess depth is automatically clamped so it never exceeds the
+  base thickness. A warning is printed when this reduction occurs.
 - When only one keyhole is used, consider measuring the weight distribution of
   the final print and setting `keyhole_balance_offset` accordingly so the plate
   hangs level. The same offset is applied to two-keyhole layouts.
