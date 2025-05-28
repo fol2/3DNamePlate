@@ -273,9 +273,14 @@ assert(tm_feature_check.size.x > 0,
            "Install a recent OpenSCAD snapshot and activate\n",
            "Edit \u2192 Preferences \u2192 Features \u2192 textmetrics"));
 
-// Ensure the keyhole recess does not exceed the base thickness
-assert(keyhole_depth + keyhole_head_depth + keyhole_bleed < baseheight,
-       "keyhole_depth must be less than baseheight");
+// Limit the total keyhole recess depth so it never exceeds the base thickness.
+// Users of older versions saw an assertion failure if the sum of
+// `keyhole_depth`, `keyhole_head_depth` and `keyhole_bleed` was too large.
+keyhole_depth_eff = min(keyhole_depth + keyhole_head_depth + keyhole_bleed,
+                        baseheight);
+if (keyhole_depth_eff < keyhole_depth + keyhole_head_depth + keyhole_bleed)
+    echo(str("WARNING: keyhole depth clamped to baseheight (",
+              keyhole_depth_eff, "mm)"));
 
 fontname1_final = (fontname1_override!="" ? fontname1_override : fontname1);
 fontname2_final = (fontname2_override!="" ? fontname2_override : (fontname2=="<same as fontname1>" ? fontname1_final : fontname2));
@@ -1332,7 +1337,7 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             if (keyhole_count > 0)
                 KeyholeCutouts(keyhole_count, keyhole_spacing,
                                keyhole_diameter, keyhole_slot_width,
-                               keyhole_slot_length, keyhole_depth,
+                               keyhole_slot_length, keyhole_depth_eff,
                                keyhole_head_depth, keyhole_vertical_offset,
                                keyhole_balance_offset, keyhole_bleed);
 
