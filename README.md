@@ -14,6 +14,7 @@ Emoji and special characters are supported. For the best results install a font 
 Use the optional `special_character_y_offset` parameter to raise or lower the left and right special icons if they need slight vertical adjustment.
 The `emoji_size_scale` parameter adjusts the size of the left/right special characters. A separate `emoji_text_size_scale` control changes the size of emoji characters that appear inside the text lines.
 The new `emoji_text_x_offset` and `emoji_text_y_offset` parameters can shift those inline emoji left/right or up/down if needed.
+When using the **Bottom_Line** base style a new `emoji_base_infill` option can fill the interior of emoji characters with the base color so disconnected strokes fuse to the plate.
 
 Hidden text can also be engraved on the underside of the plate. Set the text via `HiddenText` and adjust its size with `HiddenTextSize`. The new parameters `HiddenTextStyle`, `HiddenTextX`, `HiddenTextY` and `HiddenTextDepth` control the font style, position offsets and engraving depth of this secret message.
 

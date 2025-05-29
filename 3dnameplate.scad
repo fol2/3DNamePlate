@@ -188,6 +188,9 @@ line_width_scale_factor = 1;  //[0.1:0.01:10]
 // Bottom epsilon used to slightly shave the text's bottom
 bottom_epsilon = -2.0; //[-10:0.1:10]
 
+// Fill emoji shapes with base color when using Bottom_Line base
+emoji_base_infill = false; //[false:true]
+
 //-----------------
 /* [Sweep Settings] */ 
 
@@ -508,6 +511,33 @@ module draw_text_line_with_emoji(str, size, normal_font, emoji_font)
     }
 }
 
+// Render only the emoji characters of a text line.
+// Used when filling emojis with base color.
+module draw_text_line_emojis_only(str, size, normal_font, emoji_font)
+{
+    for(i = [0 : len(str)-1])
+    {
+        ch = str[i];
+        use_font = is_emoji_char(ch) ? emoji_font : normal_font;
+        ch_size = is_emoji_char(ch) ? size * emoji_text_size_scale : size;
+
+        x_off = (i == 0) ? 0 :
+            list_sum([for(j=[0:i-1]) let(prev=str[j],
+                                        pf=is_emoji_char(prev) ? emoji_font : normal_font,
+                                        prev_size = is_emoji_char(prev) ? size * emoji_text_size_scale : size,
+                                        m=textmetrics(prev, size=prev_size, font=pf,
+                                                     spacing=letter_spacing_scale))
+                     m.advance.x * letter_spacing_scale]);
+
+        if(is_emoji_char(ch))
+            translate([x_off, 0, 0])
+                translate([emoji_text_x_offset, emoji_text_y_offset, 0])
+                    text(ch, size=ch_size, font=use_font,
+                         halign="left", valign="center",
+                         spacing=letter_spacing_scale);
+    }
+}
+
 // 2D outline of a keyhole with a circular head and narrow slot
 // 2D outline of a keyhole with a circular head and a slot opening upward.
 // The circle center is the reference point. The slot extends in +Y so that
@@ -627,6 +657,34 @@ module writetext(textstr1, textstr2, textstr3, sizeit1, sizeit2, sizeit3, add_a_
             }
         }
 
+}
+
+// Draw only emoji characters from the text lines and special emoji fields
+// This mirrors writetext but emits emoji glyphs only.
+module writetext_emojis_only(textstr1, textstr2, textstr3, sizeit1, sizeit2, sizeit3)
+{
+    translate([shifttext,0,0])
+    {
+        translate([0,distance_line_2_to_3+distance_line_1_to_2,0])
+            draw_text_line_emojis_only(textstr1, sizeit1, fullfont1, emoji_font_full_text);
+
+        translate([0,distance_line_2_to_3,0])
+            draw_text_line_emojis_only(textstr2, sizeit2, fullfont2, emoji_font_full_text);
+
+        draw_text_line_emojis_only(textstr3, sizeit3, fullfont3, emoji_font_full_text);
+    }
+
+    translate([0,specialchar_y,0])
+    {
+        if (special_emoji_left!="")
+            translate([ -textwidth/2-distancespecialchar,0,0])
+                do_special_char(special_emoji_left,special_emoji_left);
+
+        if (special_emoji_right!="")
+            translate([ textwidth/2+distancespecialchar,0,0])
+                scale([(flip_right_character?-1:1),1,1])
+                    do_special_char(special_emoji_right,special_emoji_right);
+    }
 }
 
 
@@ -952,6 +1010,15 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
         
         translate([-cutting_rect_width/2, final_cut_y_level, 0]) 
             square([cutting_rect_width, cutting_rect_height]);
+    }
+}
+
+// Create a flattened shape containing only emojis from the text
+module flat_bottom_emoji_shape(t1, t2, t3, s1, s2, s3)
+{
+    intersection() {
+        flat_bottom_text_shape(t1, t2, t3, s1, s2, s3, 0);
+        writetext_emojis_only(t1, t2, t3, s1, s2, s3);
     }
 }
 
@@ -1410,10 +1477,16 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
                 // b) 渲染线条本身 (使用 base_color)，它将填充上面difference操作留下的空隙
                 color(rgb255(base_color))
                 linear_extrude(height=letter_caps_thickness, convexity = 10) {
-                    CreateTextIntersectingLine(textstr1, textstr2, textstr3, 
-                                               textsize1, textsize2, textsize3, 
+                    CreateTextIntersectingLine(textstr1, textstr2, textstr3,
+                                               textsize1, textsize2, textsize3,
                                                line_y_factor, line_visual_thickness_2d);
                 }
+
+                if (emoji_base_infill)
+                    color(rgb255(base_color))
+                        linear_extrude(height=letter_caps_thickness, convexity = 10)
+                            flat_bottom_emoji_shape(textstr1, textstr2, textstr3,
+                                                  textsize1, textsize2, textsize3);
             } else {
                 // 情况2：其他 BaseType (保持原有行为)
                 // 生成并挤出主要的文本字符 (使用 text_color)
