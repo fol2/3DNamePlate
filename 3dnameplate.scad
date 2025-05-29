@@ -104,7 +104,7 @@ emoji_base_strokes=false;
 emoji_infill_thickness=1; //[0:0.1:5]
 
 // Margin used when offsetting emoji outlines to close gaps (mm)
-emoji_infill_margin=5; //[0:1:10]
+emoji_infill_margin=5; //[0:0.1:10]
 
 // Width of the stroke outlines if `emoji_base_strokes` is true (mm)
 emoji_stroke_width=0.4; //[0:0.1:1]
