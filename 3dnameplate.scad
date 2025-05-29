@@ -1012,8 +1012,9 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
 // Create a closed region covering all emoji glyphs with a flattened bottom
 module flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
                                 sizeit1_param, sizeit2_param, sizeit3_param,
-                                margin) {
-    raised_text_shave_epsilon = bottom_epsilon;
+                                margin,
+                                shave_epsilon = bottom_epsilon) {
+    raised_text_shave_epsilon = shave_epsilon;
 
     function calculate_text_baseline_y(Text_Y_Center, Text_String, Font_Size, Font_Name_Full) =
         (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 :
@@ -1093,16 +1094,17 @@ module flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
 // Create thin outline strokes of the flattened emoji shapes
 module flat_bottom_emoji_strokes(textstr1_param, textstr2_param, textstr3_param,
                                  sizeit1_param, sizeit2_param, sizeit3_param,
-                                 margin, stroke_width) {
+                                 margin, stroke_width,
+                                 shave_epsilon = bottom_epsilon) {
     difference() {
         offset(delta= stroke_width / 2)
             flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
                                      sizeit1_param, sizeit2_param, sizeit3_param,
-                                     margin);
+                                     margin, shave_epsilon);
         offset(delta= -stroke_width / 2)
             flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
                                      sizeit1_param, sizeit2_param, sizeit3_param,
-                                     margin);
+                                     margin, shave_epsilon);
     }
 }
 
@@ -1550,14 +1552,17 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
                     linear_extrude(height=emoji_infill_thickness, convexity = 10)
                         flat_bottom_emoji_infill(textstr1, textstr2, textstr3,
                                                  textsize1, textsize2, textsize3,
-                                                 emoji_infill_margin);
+                                                 emoji_infill_margin,
+                                                 bottom_epsilon);
 
             if (emoji_base_strokes)
                 color(rgb255(base_color))
                     linear_extrude(height=emoji_infill_thickness, convexity = 10)
                         flat_bottom_emoji_strokes(textstr1, textstr2, textstr3,
                                                  textsize1, textsize2, textsize3,
-                                                 emoji_infill_margin, emoji_stroke_width);
+                                                 emoji_infill_margin,
+                                                 emoji_stroke_width,
+                                                 bottom_epsilon);
             if (BaseType == "Bottom_Line") {
                 // 情况1：Bottom_Line 类型
                 // a) 渲染文本，但减去线条的区域 (使用 text_color)
