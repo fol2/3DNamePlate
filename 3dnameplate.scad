@@ -94,11 +94,20 @@ emoji_size_scale = 1; //[0.5:0.05:2]
 // Font used for emoji characters in special icons
 emoji_font="Noto Emoji";
 
-// When enabled, fill the area underneath emoji glyphs with base_color
+// When enabled, fill the area underneath emoji glyphs with `base_color`
 emoji_base_infill=false;
 
-// Margin used when offsetting emoji outlines for the infill (mm)
+// When enabled, draw thin base-colored outlines instead of a solid infill
+emoji_base_strokes=false;
+
+// Extrusion height for the emoji infill or strokes (mm)
+emoji_infill_thickness=1; //[0:0.1:5]
+
+// Margin used when offsetting emoji outlines to close gaps (mm)
 emoji_infill_margin=0.5; //[0:0.1:2]
+
+// Width of the stroke outlines if `emoji_base_strokes` is true (mm)
+emoji_stroke_width=0.4; //[0:0.1:1]
 
 //-----------------
 /* [Color Settings] */ 
@@ -1081,6 +1090,22 @@ module flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
             }
 }
 
+// Create thin outline strokes of the flattened emoji shapes
+module flat_bottom_emoji_strokes(textstr1_param, textstr2_param, textstr3_param,
+                                 sizeit1_param, sizeit2_param, sizeit3_param,
+                                 margin, stroke_width) {
+    difference() {
+        offset(delta= stroke_width / 2)
+            flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
+                                     sizeit1_param, sizeit2_param, sizeit3_param,
+                                     margin);
+        offset(delta= -stroke_width / 2)
+            flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
+                                     sizeit1_param, sizeit2_param, sizeit3_param,
+                                     margin);
+    }
+}
+
 // NEW module (v1) to flatten the ACTUAL bottom of any 2D child object
 // It finds the minimum Y of the child's bounding box and cuts at/slightly above that.
 module flatten_bottom_of_child(shave_epsilon = bottom_epsilon) {
@@ -1520,12 +1545,17 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
         // 整体向上平移 baseheight，然后挤出 letter_caps_thickness 厚度
         // 整体向上平移 baseheight
         translate([0,0,baseheight]) {
-            if (emoji_base_infill)
+            if (emoji_base_infill || emoji_base_strokes)
                 color(rgb255(base_color))
-                    linear_extrude(height=letter_caps_thickness, convexity = 10)
-                        flat_bottom_emoji_infill(textstr1, textstr2, textstr3,
-                                                 textsize1, textsize2, textsize3,
-                                                 emoji_infill_margin);
+                    linear_extrude(height=emoji_infill_thickness, convexity = 10)
+                        if (emoji_base_strokes)
+                            flat_bottom_emoji_strokes(textstr1, textstr2, textstr3,
+                                                     textsize1, textsize2, textsize3,
+                                                     emoji_infill_margin, emoji_stroke_width);
+                        else
+                            flat_bottom_emoji_infill(textstr1, textstr2, textstr3,
+                                                     textsize1, textsize2, textsize3,
+                                                     emoji_infill_margin);
             if (BaseType == "Bottom_Line") {
                 // 情况1：Bottom_Line 类型
                 // a) 渲染文本，但减去线条的区域 (使用 text_color)
