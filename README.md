@@ -15,6 +15,8 @@ Use the optional `special_character_y_offset` parameter to raise or lower the le
 The `emoji_size_scale` parameter adjusts the size of the left/right special characters. A separate `emoji_text_size_scale` control changes the size of emoji characters that appear inside the text lines.
 The new `emoji_text_x_offset` and `emoji_text_y_offset` parameters can shift those inline emoji left/right or up/down if needed.
 
+Enable `emoji_base_infill` to fill the area underneath emoji characters with the base color before the glyphs are extruded. `emoji_infill_margin` controls how the outlines are expanded to close small gaps and also sets the stroke width when `emoji_base_strokes` is enabled. `emoji_infill_thickness` specifies how tall this filler or stroke region should be. Use `emoji_base_strokes` if you prefer a thin outline around the emoji instead of a solid infill.
+
 Hidden text can also be engraved on the underside of the plate. Set the text via `HiddenText` and adjust its size with `HiddenTextSize`. The new parameters `HiddenTextStyle`, `HiddenTextX`, `HiddenTextY` and `HiddenTextDepth` control the font style, position offsets and engraving depth of this secret message.
 
 When the base style is set to **Round**, the `round_base_link_thickness` parameter can add slim connectors along each text line before the base is offset. These bars help link separated letters into a single circular plate. Set it to `0` to disable the connectors.
