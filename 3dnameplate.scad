@@ -1545,17 +1545,19 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
         // 整体向上平移 baseheight，然后挤出 letter_caps_thickness 厚度
         // 整体向上平移 baseheight
         translate([0,0,baseheight]) {
-            if (emoji_base_infill || emoji_base_strokes)
+            if (emoji_base_infill)
                 color(rgb255(base_color))
                     linear_extrude(height=emoji_infill_thickness, convexity = 10)
-                        if (emoji_base_strokes)
-                            flat_bottom_emoji_strokes(textstr1, textstr2, textstr3,
-                                                     textsize1, textsize2, textsize3,
-                                                     emoji_infill_margin, emoji_stroke_width);
-                        else
-                            flat_bottom_emoji_infill(textstr1, textstr2, textstr3,
-                                                     textsize1, textsize2, textsize3,
-                                                     emoji_infill_margin);
+                        flat_bottom_emoji_infill(textstr1, textstr2, textstr3,
+                                                 textsize1, textsize2, textsize3,
+                                                 emoji_infill_margin);
+
+            if (emoji_base_strokes)
+                color(rgb255(base_color))
+                    linear_extrude(height=emoji_infill_thickness, convexity = 10)
+                        flat_bottom_emoji_strokes(textstr1, textstr2, textstr3,
+                                                 textsize1, textsize2, textsize3,
+                                                 emoji_infill_margin, emoji_stroke_width);
             if (BaseType == "Bottom_Line") {
                 // 情况1：Bottom_Line 类型
                 // a) 渲染文本，但减去线条的区域 (使用 text_color)
