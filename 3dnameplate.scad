@@ -94,6 +94,15 @@ emoji_size_scale = 1; //[0.5:0.05:2]
 // Font used for emoji characters in special icons
 emoji_font="Noto Emoji";
 
+// When enabled, fill the area underneath emoji glyphs with base_color
+emoji_base_infill=false;
+
+// Margin used when offsetting emoji outlines for the infill (mm)
+emoji_infill_margin=0.5; //[0:0.1:2]
+
+// Thickness of the optional emoji infill region (mm)
+emoji_infill_thickness=1; //[0:0.5:5]
+
 //-----------------
 /* [Color Settings] */ 
 
@@ -504,7 +513,46 @@ module draw_text_line_with_emoji(str, size, normal_font, emoji_font)
                       : [0, 0, 0])
                 text(ch, size=ch_size, font=use_font,
                      halign="left", valign="center",
-                     spacing=letter_spacing_scale);
+                    spacing=letter_spacing_scale);
+    }
+}
+
+// Render only the emoji glyphs from a text line at their correct positions
+module draw_text_line_emojis_only(str, size, normal_font, emoji_font)
+{
+    for(i = [0 : len(str)-1])
+    {
+        ch = str[i];
+        // Advance offset accounts for all characters so emojis line up
+        x_off = (i == 0) ? 0 :
+            list_sum([for(j=[0:i-1]) let(prev=str[j],
+                                        pf=is_emoji_char(prev) ? emoji_font : normal_font,
+                                        prev_size = is_emoji_char(prev) ? size * emoji_text_size_scale : size,
+                                        m=textmetrics(prev, size=prev_size, font=pf,
+                                                     spacing=letter_spacing_scale))
+                     m.advance.x * letter_spacing_scale]);
+
+        if (is_emoji_char(ch))
+            translate([x_off, 0, 0])
+                translate([emoji_text_x_offset, emoji_text_y_offset, 0])
+                    text(ch, size=size * emoji_text_size_scale, font=emoji_font,
+                         halign="left", valign="center",
+                         spacing=letter_spacing_scale);
+    }
+}
+
+// Write only emoji characters from the three text lines
+module writetext_emojis_only(textstr1, textstr2, textstr3, sizeit1, sizeit2, sizeit3)
+{
+    translate([shifttext,0,0])
+    {
+        translate([0,distance_line_2_to_3+distance_line_1_to_2,0])
+            draw_text_line_emojis_only(textstr1, sizeit1, fullfont1, emoji_font_full_text);
+
+        translate([0,distance_line_2_to_3,0])
+            draw_text_line_emojis_only(textstr2, sizeit2, fullfont2, emoji_font_full_text);
+
+        draw_text_line_emojis_only(textstr3, sizeit3, fullfont3, emoji_font_full_text);
     }
 }
 
@@ -950,9 +998,90 @@ module flat_bottom_text_shape(textstr1_param, textstr2_param, textstr3_param, si
         cutting_rect_width = 1000; 
         cutting_rect_height = 500;
         
-        translate([-cutting_rect_width/2, final_cut_y_level, 0]) 
+        translate([-cutting_rect_width/2, final_cut_y_level, 0])
             square([cutting_rect_width, cutting_rect_height]);
     }
+}
+
+// Create a closed region covering all emoji glyphs with a flattened bottom
+module flat_bottom_emoji_infill(textstr1_param, textstr2_param, textstr3_param,
+                                sizeit1_param, sizeit2_param, sizeit3_param,
+                                margin) {
+    raised_text_shave_epsilon = bottom_epsilon;
+
+    function calculate_text_baseline_y(Text_Y_Center, Text_String, Font_Size, Font_Name_Full) =
+        (Text_String == "" || Text_String == undef || Font_Size <= 0) ? 100000 :
+            let(
+                safe_font_name = (Font_Name_Full == undef || Font_Name_Full == "") ? "Liberation Sans" : Font_Name_Full,
+                metrics = textmetrics(text=Text_String, size=Font_Size, font=safe_font_name, spacing=letter_spacing_scale)
+            )
+            (metrics.descent == undef || metrics.ascent == undef) ? Text_Y_Center - Font_Size/2 :
+            Text_Y_Center - (metrics.ascent + metrics.descent) / 2;
+
+    baseline_L1_y = calculate_text_baseline_y(
+        (distance_line_2_to_3 + distance_line_1_to_2), textstr1_param, sizeit1_param, fullfont1
+    );
+    baseline_L2_y = calculate_text_baseline_y(
+        distance_line_2_to_3, textstr2_param, sizeit2_param, fullfont2
+    );
+    baseline_L3_y = calculate_text_baseline_y(
+        0, textstr3_param, sizeit3_param, fullfont3
+    );
+
+    function sc_is_icon(typestr, emoji_str) =
+        !((emoji_str != "" && emoji_str != undef) ||
+          (type(typestr) == "int") ||
+          (len(typestr) < 3 && typestr != "" && typestr != undef ));
+
+    baseline_SC_left_y = 100000;
+    if ((special_character_left != "" && special_character_left != undef) || (special_emoji_left != "" && special_emoji_left != undef)) {
+        if (sc_is_icon(special_character_left, special_emoji_left)) {
+            baseline_SC_left_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else {
+            actual_sc_str_left = (special_emoji_left != "" && special_emoji_left != undef) ? special_emoji_left :
+                           (type(special_character_left) == "int") ? chr(special_character_left) : special_character_left;
+            actual_sc_font_left = (special_emoji_left != "" && special_emoji_left != undef) ? emoji_font_full_special :
+                                 ((type(special_character_left) == "int") ? "Noto" : emoji_font_full_special);
+            baseline_SC_left_y = calculate_text_baseline_y(
+                specialchar_y, actual_sc_str_left, specialcharsize, actual_sc_font_left
+            );
+        }
+    }
+
+    baseline_SC_right_y = 100000;
+    if ((special_character_right != "" && special_character_right != undef) || (special_emoji_right != "" && special_emoji_right != undef)) {
+        if (sc_is_icon(special_character_right, special_emoji_right)) {
+            baseline_SC_right_y = specialchar_y - (specialcharsize > 0 ? specialcharsize : 1)/2;
+        } else {
+            actual_sc_str_right = (special_emoji_right != "" && special_emoji_right != undef) ? special_emoji_right :
+                           (type(special_character_right) == "int") ? chr(special_character_right) : special_character_right;
+            actual_sc_font_right = (special_emoji_right != "" && special_emoji_right != undef) ? emoji_font_full_special :
+                                  ((type(special_character_right) == "int") ? "Noto" : emoji_font_full_special);
+            baseline_SC_right_y = calculate_text_baseline_y(
+                specialchar_y, actual_sc_str_right, specialcharsize, actual_sc_font_right
+            );
+        }
+    }
+
+    determined_lowest_baseline = min(baseline_L1_y, baseline_L2_y, baseline_L3_y, baseline_SC_left_y, baseline_SC_right_y);
+    if (determined_lowest_baseline == 100000) {
+        determined_lowest_baseline = 0;
+    }
+
+    final_cut_y_level = determined_lowest_baseline + raised_text_shave_epsilon;
+
+    offset(delta=-margin)
+        offset(delta=margin)
+            intersection() {
+                writetext_emojis_only(textstr1_param, textstr2_param, textstr3_param,
+                                      sizeit1_param, sizeit2_param, sizeit3_param);
+
+                cutting_rect_width = 1000;
+                cutting_rect_height = 500;
+
+                translate([-cutting_rect_width/2, final_cut_y_level, 0])
+                    square([cutting_rect_width, cutting_rect_height]);
+            }
 }
 
 // NEW module (v1) to flatten the ACTUAL bottom of any 2D child object
@@ -1394,6 +1523,12 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
         // 整体向上平移 baseheight，然后挤出 letter_caps_thickness 厚度
         // 整体向上平移 baseheight
         translate([0,0,baseheight]) {
+            if (emoji_base_infill)
+                color(rgb255(base_color))
+                    linear_extrude(height=emoji_infill_thickness, convexity = 10)
+                        flat_bottom_emoji_infill(textstr1, textstr2, textstr3,
+                                                 textsize1, textsize2, textsize3,
+                                                 emoji_infill_margin);
             if (BaseType == "Bottom_Line") {
                 // 情况1：Bottom_Line 类型
                 // a) 渲染文本，但减去线条的区域 (使用 text_color)
