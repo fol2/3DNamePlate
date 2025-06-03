@@ -293,8 +293,14 @@ photoframe_border = 3; //[0.5:0.1:20]
 //Frame thickness along the Z axis (mm)
 photoframe_thickness = baseheight; //[0.5:0.1:20]
 
+//Vertical offset of the bottom of the frame from the base (mm)
+photoframe_z_offset = 0; //[-20:0.1:20]
+
 //Depth of the photo slot to subtract (mm)
 photoframe_slot_depth = baseheight; //[0.1:0.1:20]
+
+//Extra margin around the inner opening for the slot (mm)
+photoframe_slot_margin = 0.2; //[0:0.1:2]
 
 //Horizontal offset of the frame center (mm)
 photoframe_x_offset = 0; //[-200:0.1:200]
@@ -667,11 +673,13 @@ module PhotoFrameShape(w, h, border, thickness) {
 }
 
 // Subtractive slot for the photo opening
-module PhotoFrameSlot(w, h, border, depth) {
+module PhotoFrameSlot(w, h, border, depth, gap) {
     inner = [w - 2*border, h - 2*border];
+    slot_w = min(w, inner[0] + 2*gap);
+    slot_h = min(h, inner[1] + 2*gap);
     translate([0,0,-0.01])
         linear_extrude(height = depth + 0.02)
-            square(inner, center=true);
+            square([slot_w, slot_h], center=true);
 }
 
 
@@ -1540,9 +1548,11 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 
                 // Optional photo frame geometry
                 if (photoframe_enable)
-                    translate([photoframe_x_offset, photoframe_y_offset, 0])
+                    translate([photoframe_x_offset, photoframe_y_offset,
+                              photoframe_z_offset])
                         PhotoFrameShape(photoframe_width, photoframe_height,
-                                        photoframe_border, photoframe_thickness);
+                                        photoframe_border,
+                                        photoframe_thickness);
             }
 
             // Swiss-cheese style holes pattern
@@ -1589,9 +1599,11 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 
             // Remove the photo slot so the frame opening remains clear
             if (photoframe_enable)
-                translate([photoframe_x_offset, photoframe_y_offset, 0])
+                translate([photoframe_x_offset, photoframe_y_offset,
+                          photoframe_z_offset])
                     PhotoFrameSlot(photoframe_width, photoframe_height,
-                                   photoframe_border, photoframe_slot_depth);
+                                   photoframe_border, photoframe_slot_depth,
+                                   photoframe_slot_margin);
 
             //cutout keyhole hangers if enabled
             if (keyhole_count > 0)
