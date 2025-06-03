@@ -53,7 +53,9 @@ plate. Enable the frame in the **Photo Frame Settings** section and specify the
 outer dimensions and border width. Set `photoframe_thick` to control how high
 the frame protrudes from the base. The thickness is measured upward from the
 bottom so it can be raised or recessed using the `photoframe_z_offset`
-parameter. The internal slot is centered on this thickness and extends just
-above the frame so it overwrites any overlapping base material. Its size is
-slightly larger than the frame opening, controlled by `photoframe_slot_margin`.
-This lets a printed photo slide in even when the frame merges with the plate.
+parameter. A square slot is subtracted from inside the frame so a printed photo
+can slide in. The slot starts at the bottom of the frame and reaches slightly
+above the top to clear any overlapping base material. Adjust
+`photoframe_slot_depth` to control how far down it cuts and
+`photoframe_slot_penetration` for how much it extends above the frame. The slot
+can also be widened using `photoframe_slot_margin` for an easier fit.

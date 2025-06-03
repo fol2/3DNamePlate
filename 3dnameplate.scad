@@ -301,6 +301,9 @@ photoframe_z_offset = 0; //[-20:0.1:20]
 //Depth of the photo slot to subtract (mm)
 photoframe_slot_depth = baseheight; //[0.1:0.1:20]
 
+//Extra penetration above the frame top for the slot (mm)
+photoframe_slot_penetration = 0.01; //[0:0.01:2]
+
 //Extra margin around the inner opening for the slot (mm)
 photoframe_slot_margin = 0.2; //[0:0.1:2]
 
@@ -675,15 +678,14 @@ module PhotoFrameShape(w, h, border, thickness) {
 }
 
 // Subtractive slot for the photo opening
-// The slot is centered on the frame thickness so it can cut
-// through the frame even when only partially merged with the base.
+// The slot is extruded upward from its bottom so it can reach
+// slightly above the frame and overwrite any overlapping base.
 module PhotoFrameSlot(w, h, border, depth, gap) {
     inner = [w - 2*border, h - 2*border];
     slot_w = min(w, inner[0] + 2*gap);
     slot_h = min(h, inner[1] + 2*gap);
-    translate([0,0,-0.01])
-        linear_extrude(height = depth + 0.02, center=true)
-            square([slot_w, slot_h], center=true);
+    linear_extrude(height = depth, center=false)
+        square([slot_w, slot_h], center=true);
 }
 
 
@@ -1605,9 +1607,13 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             if (photoframe_enable)
                 translate([photoframe_x_offset, photoframe_y_offset,
                           photoframe_z_offset + photoframe_thickness
-                              - photoframe_slot_depth/2 + 0.01])
+                              - photoframe_slot_depth
+                              - 0.01])
                     PhotoFrameSlot(photoframe_width, photoframe_height,
-                                   photoframe_border, photoframe_slot_depth,
+                                   photoframe_border,
+                                   photoframe_slot_depth
+                                       + photoframe_slot_penetration
+                                       + 0.02,
                                    photoframe_slot_margin);
 
             //cutout keyhole hangers if enabled
