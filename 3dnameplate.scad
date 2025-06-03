@@ -1604,7 +1604,8 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             // Remove the photo slot so the frame opening remains clear
             if (photoframe_enable)
                 translate([photoframe_x_offset, photoframe_y_offset,
-                          photoframe_z_offset + photoframe_thickness/2])
+                          photoframe_z_offset + photoframe_thickness
+                              - photoframe_slot_depth/2 + 0.01])
                     PhotoFrameSlot(photoframe_width, photoframe_height,
                                    photoframe_border, photoframe_slot_depth,
                                    photoframe_slot_margin);
