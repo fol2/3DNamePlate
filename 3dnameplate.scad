@@ -302,6 +302,9 @@ photoframe_slot_depth = 2; //[0.1:0.1:20]
 //Extra margin around the inner opening for the slot (mm)
 photoframe_slot_margin = 0.2; //[0:0.1:2]
 
+// Extra vertical extension of the slot above the frame (mm)
+photoframe_slot_extension = 0; //[0:0.1:20]
+
 //Horizontal offset of the frame center (mm)
 photoframe_x_offset = 0; //[-200:0.1:200]
 
@@ -675,11 +678,11 @@ module PhotoFrameShape(w, h, border, thickness) {
 // Subtractive slot for the photo opening
 // The slot is centered on the frame thickness so it can cut
 // through the frame even when only partially merged with the base.
-module PhotoFrameSlot(w, h, border, depth, gap) {
+module PhotoFrameSlot(w, h, border, depth, gap, extension=0) {
     inner = [w - 2*border, h - 2*border];
     slot_w = min(w, inner[0] + 2*gap);
-    slot_h = min(h, inner[1] + 2*gap);
-    translate([0,0,-0.01])
+    slot_h = min(h + extension, inner[1] + 2*gap + extension);
+    translate([0, extension/2, -0.01])
         linear_extrude(height = depth + 0.02, center=true)
             square([slot_w, slot_h], center=true);
 }
@@ -1605,7 +1608,8 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
                           photoframe_z_offset + photoframe_thickness/2])
                     PhotoFrameSlot(photoframe_width, photoframe_height,
                                    photoframe_border, photoframe_slot_depth,
-                                   photoframe_slot_margin);
+                                   photoframe_slot_margin,
+                                   photoframe_slot_extension);
 
             //cutout keyhole hangers if enabled
             if (keyhole_count > 0)
