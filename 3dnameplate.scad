@@ -673,12 +673,14 @@ module PhotoFrameShape(w, h, border, thickness) {
 }
 
 // Subtractive slot for the photo opening
+// The slot is centered on the frame thickness so it can cut
+// through the frame even when only partially merged with the base.
 module PhotoFrameSlot(w, h, border, depth, gap) {
     inner = [w - 2*border, h - 2*border];
     slot_w = min(w, inner[0] + 2*gap);
     slot_h = min(h, inner[1] + 2*gap);
     translate([0,0,-0.01])
-        linear_extrude(height = depth + 0.02)
+        linear_extrude(height = depth + 0.02, center=true)
             square([slot_w, slot_h], center=true);
 }
 
@@ -1600,7 +1602,7 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
             // Remove the photo slot so the frame opening remains clear
             if (photoframe_enable)
                 translate([photoframe_x_offset, photoframe_y_offset,
-                          photoframe_z_offset])
+                          photoframe_z_offset + photoframe_thickness/2])
                     PhotoFrameSlot(photoframe_width, photoframe_height,
                                    photoframe_border, photoframe_slot_depth,
                                    photoframe_slot_margin);

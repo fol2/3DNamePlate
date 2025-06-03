@@ -52,6 +52,7 @@ The script can optionally generate a rectangular photo frame as part of the
 plate. Enable the frame in the **Photo Frame Settings** section and specify the
 outer dimensions and border width. The frame thickness is measured from the
 bottom upward so it can be raised or recessed using the `photoframe_z_offset`
-parameter. The internal slot is slightly larger than the frame opening,
-controlled by `photoframe_slot_margin`, so a printed photo can slide in even
-when the frame overlaps the base.
+parameter. The internal slot is centered on the frame thickness so it
+overwrites any overlapping base material. Its size is slightly larger than the
+frame opening, controlled by `photoframe_slot_margin`, allowing a printed photo
+to slide in even when the frame merges with the plate.
