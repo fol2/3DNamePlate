@@ -291,7 +291,9 @@ photoframe_height = 50; //[10:1:300]
 photoframe_border = 3; //[0.5:0.1:20]
 
 //Frame thickness along the Z axis (mm)
-photoframe_thickness = baseheight; //[0.5:0.1:20]
+photoframe_thick = baseheight; //[0.5:0.1:20]
+//Alias used internally by the modules
+photoframe_thickness = photoframe_thick;
 
 //Vertical offset of the bottom of the frame from the base (mm)
 photoframe_z_offset = 0; //[-20:0.1:20]
