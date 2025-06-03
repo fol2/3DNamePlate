@@ -45,3 +45,11 @@ Set `keyhole_support_height` to a positive value to grow a reinforcing patch
 around each hanger before it is cut out. The thickness of this patch is the
 support height, while `keyhole_support_margin` controls how far the outline is
 expanded when creating the support.
+
+### Photo Frame Attachment
+
+The script can optionally generate a rectangular photo frame as part of the
+plate. Enable the frame in the **Photo Frame Settings** section and specify the
+outer dimensions and border width. The internal slot is automatically
+subtracted from the model so a printed photo can slide in even when the frame
+overlaps the base.

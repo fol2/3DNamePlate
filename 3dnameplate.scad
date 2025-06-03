@@ -276,7 +276,34 @@ keyhole_balance_offset = 0; //[-100:0.1:100]
 keyhole_bleed = 0.1; //[0:0.05:0.5]
 
 //-----------------
-/* [Base Swiss Settings] */ 
+/* [Photo Frame Settings] */
+
+//Enable the photo frame attachment
+photoframe_enable = false; //[false:true]
+
+//Outer width of the frame (mm)
+photoframe_width = 50; //[10:1:300]
+
+//Outer height of the frame (mm)
+photoframe_height = 50; //[10:1:300]
+
+//Width of the frame border (mm)
+photoframe_border = 3; //[0.5:0.1:20]
+
+//Frame thickness along the Z axis (mm)
+photoframe_thickness = baseheight; //[0.5:0.1:20]
+
+//Depth of the photo slot to subtract (mm)
+photoframe_slot_depth = baseheight; //[0.1:0.1:20]
+
+//Horizontal offset of the frame center (mm)
+photoframe_x_offset = 0; //[-200:0.1:200]
+
+//Vertical offset of the frame center (mm)
+photoframe_y_offset = 0; //[-200:0.1:200]
+
+//-----------------
+/* [Base Swiss Settings] */
 
 //You can have several holes in the base in a regular pattern. Use it if you need a hole for a magnet/fixture in a few positions. You activate the holes by setting a non-zero value (e.g. 5mm)
 BaseSwissCheeseHoleD=0;
@@ -624,6 +651,27 @@ module KeyholeCutouts(count, spacing, d, slot_w, slot_len,
     for(xp = positions)
         translate([xp, y_pos, 0])
             KeyholeCutout(d, slot_w, slot_len, depth, head_depth, bleed);
+}
+
+// 2D rectangular frame for holding a photo
+module PhotoFrameShape(w, h, border, thickness) {
+    outer = [w, h];
+    inner = [w - 2*border, h - 2*border];
+    difference() {
+        linear_extrude(height = thickness)
+            square(outer, center=true);
+        translate([0,0,-0.01])
+            linear_extrude(height = thickness + 0.02)
+                square(inner, center=true);
+    }
+}
+
+// Subtractive slot for the photo opening
+module PhotoFrameSlot(w, h, border, depth) {
+    inner = [w - 2*border, h - 2*border];
+    translate([0,0,-0.01])
+        linear_extrude(height = depth + 0.02)
+            square(inner, center=true);
 }
 
 
@@ -1489,6 +1537,12 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 
                 // Add magnet holder walls if enabled
                 MagnetHolder(magnettype,"add");
+
+                // Optional photo frame geometry
+                if (photoframe_enable)
+                    translate([photoframe_x_offset, photoframe_y_offset, 0])
+                        PhotoFrameShape(photoframe_width, photoframe_height,
+                                        photoframe_border, photoframe_thickness);
             }
 
             // Swiss-cheese style holes pattern
@@ -1532,6 +1586,12 @@ module BaseTextCaps(textstr1, textstr2, textstr3, textsize1, textsize2, textsize
 
             //cutout magnets
             MagnetHolder(magnettype,"subtract");
+
+            // Remove the photo slot so the frame opening remains clear
+            if (photoframe_enable)
+                translate([photoframe_x_offset, photoframe_y_offset, 0])
+                    PhotoFrameSlot(photoframe_width, photoframe_height,
+                                   photoframe_border, photoframe_slot_depth);
 
             //cutout keyhole hangers if enabled
             if (keyhole_count > 0)
