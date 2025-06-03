@@ -56,3 +56,7 @@ parameter. The internal slot is centered on the frame thickness so it
 overwrites any overlapping base material. Its size is slightly larger than the
 frame opening, controlled by `photoframe_slot_margin`, allowing a printed photo
 to slide in even when the frame merges with the plate.
+
+Use `photoframe_slot_extension` to increase the slot height and shift it
+slightly upward. A positive value leaves an opening above the frame so a
+printed photo can slide in from the top.
