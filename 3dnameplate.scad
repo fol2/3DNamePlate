@@ -305,6 +305,9 @@ photoframe_slot_margin = 0.2; //[0:0.1:10]
 // Extra vertical extension of the slot above the frame (mm)
 photoframe_slot_extension = 1; //[0:0.1:20]
 
+// Extra vertical extension of the slot above the frame (mm)
+photoframe_slot_extension = 0; //[0:0.1:20]
+
 //Horizontal offset of the frame center (mm)
 photoframe_x_offset = 0; //[-200:0.1:200]
 
