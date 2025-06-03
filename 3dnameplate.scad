@@ -291,13 +291,13 @@ photoframe_height = 50; //[10:1:300]
 photoframe_border = 3; //[0.5:0.1:20]
 
 //Frame thickness along the Z axis (mm)
-photoframe_thickness = baseheight; //[0.5:0.1:20]
+photoframe_thickness = 5; //[0.5:0.1:20]
 
 //Vertical offset of the bottom of the frame from the base (mm)
 photoframe_z_offset = 0; //[-20:0.1:20]
 
 //Depth of the photo slot to subtract (mm)
-photoframe_slot_depth = baseheight; //[0.1:0.1:20]
+photoframe_slot_depth = 2; //[0.1:0.1:20]
 
 //Extra margin around the inner opening for the slot (mm)
 photoframe_slot_margin = 0.2; //[0:0.1:2]
